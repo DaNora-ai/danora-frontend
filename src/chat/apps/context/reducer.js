@@ -6,6 +6,13 @@ export default function reducer(state, action = {}) {
         ...state,
         ...payload,
       };
+      
+    case "SET_USER_PERSONAS":
+      console.log('Reducer - Setting userPersonas:', payload);
+      return {
+        ...state,
+        userPersonas: payload
+      };
 
     default:
       return state;

@@ -98,26 +98,67 @@ export function CreateProfileModal({ visible, onClose }) {
     setCurrentStep(currentStep - 1);
   };
 
-  const handleGenerateChat = async () => {
+  const handleGenerateChat = async (e) => {
+    e.preventDefault(); // Prevent form submission
     try {
-      const promptValue = form.getFieldValue("persona_prompt");
-      if (!promptValue) {
-        setError("Please enter a prompt first");
-        return;
+      // Get all form values
+      const values = form.getFieldsValue();
+      
+      // Prepare the payload with persona details
+      const payload = {
+        // User Details (from stored state)
+        age_range: userDetails?.age_range || "",
+        gender: userDetails?.gender_identity || "",
+        location: userDetails?.location || "",
+        income_level: userDetails?.income_level || "",
+        job_title: userDetails?.job_title || "",
+        industry: userDetails?.industry || "",
+
+        // Persona Details
+        persona_name: values.persona_name || "",
+        persona_role: values.persona_role || "",
+        persona_traits: values.persona_traits || "",
+        persona_bio: values.persona_bio || "",
+        persona_pronouns: values.persona_pronouns || "",
+        persona_type: values.persona_type,
+
+        // Communication Style
+        tone: values.tone || "",
+        preferred_language: values.preferred_language || "",
+        response_length: values.response_length || "",
+        response_depth: values.response_depth || "",
+
+        // Chat Behavior
+        response_behavior: values.response_behavior || "",
+        interaction_style: values.interaction_style || "",
+      };
+
+      console.log('Sending payload to prompt generator:', payload);
+
+      const response = await fetch("http://34.68.23.90:8000/prompt_generator", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+      console.log('Response:', response);
+
+      if (!response.ok) {
+        throw new Error('Failed to generate prompt');
       }
 
-      // Here you can add the logic to generate chat based on the prompt
-      console.log("Generating chat with prompt:", promptValue);
+      const data = await response.json();
+      console.log('Generated prompt:', data);
 
-      // Example API call (you'll need to implement the actual endpoint)
-      // const response = await fetch('your-api-endpoint', {
-      //   method: 'POST',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify({ prompt: promptValue })
-      // });
+      // Update the TextArea with the generated prompt
+      form.setFieldsValue({
+        persona_prompt: data.prompt || data.response || data // handle different response formats
+      });
+
     } catch (error) {
-      console.error("Error generating chat:", error);
-      setError("Failed to generate chat");
+      console.error("Error generating prompt:", error);
+      setError("Failed to generate prompt");
     }
   };
 
@@ -337,23 +378,6 @@ export function CreateProfileModal({ visible, onClose }) {
         <TextArea rows={4} placeholder="Tell us about yourself" />
       </Form.Item>
 
-      <Form.Item
-        name="persona_prompt"
-        label={
-          <Space>
-            Persona Prompt
-            <Button type="primary" size="small" onClick={handleGenerateChat}>
-              Generate Prompt
-            </Button>
-          </Space>
-        }
-      >
-        <TextArea
-          rows={4}
-          placeholder="Enter a prompt to generate chat with this persona"
-        />
-      </Form.Item>
-
       <Form.Item name="persona_pronouns" label="Pronouns">
         <Select placeholder="Select pronouns">
           <Select.Option value="he/him">He/Him</Select.Option>
@@ -437,6 +461,41 @@ export function CreateProfileModal({ visible, onClose }) {
           <Select.Option value="collaborative">Collaborative</Select.Option>
           <Select.Option value="supportive">Supportive</Select.Option>
         </Select>
+      </Form.Item>
+
+      {/* Persona Type */}
+      <Form.Item name="persona_type" label="Persona Type">
+        <Select placeholder="Select persona type">
+          <Select.Option value="general">General</Select.Option>
+          <Select.Option value="fashion">Fashion</Select.Option>
+          <Select.Option value="luxury">Luxury</Select.Option>
+          <Select.Option value="food">Food</Select.Option>
+          <Select.Option value="tech">Tech</Select.Option>
+        </Select>
+      </Form.Item>
+
+      {/* Persona Prompt */}
+      <Divider orientation="left">Persona Prompt</Divider>
+      <Form.Item
+        name="persona_prompt"
+        label={
+          <Space>
+            Persona Prompt
+            <Button 
+              type="primary" 
+              size="small" 
+              onClick={handleGenerateChat}
+              htmlType="button" // Explicitly set button type to prevent form submission
+            >
+              Generate Prompt
+            </Button>
+          </Space>
+        }
+      >
+        <TextArea
+          rows={4}
+          placeholder="Enter a prompt to generate chat with this persona"
+        />
       </Form.Item>
     </>
   );

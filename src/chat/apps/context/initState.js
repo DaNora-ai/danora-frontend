@@ -1,4 +1,5 @@
 export const initApps = {
+  userPersonas: [],
   category: [
     {
       title: "General",

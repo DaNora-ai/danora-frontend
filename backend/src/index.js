@@ -113,6 +113,45 @@ app.get('/api/profiles/:uid', async (req, res) => {
     }
 });
 
+// Get personas by email and uid
+app.get('/api/personas/:uid/:email', async (req, res) => {
+    try {
+        const { getDB } = require('./config/db');
+        const db = await getDB();
+        const collection = db.collection("Profiles");
+        
+        console.log('Fetching personas for:', {
+            uid: req.params.uid,
+            email: req.params.email
+        });
+
+        const profiles = await collection.find({ 
+            uid: req.params.uid,
+            email: req.params.email
+        }).toArray();
+
+        console.log('Found profiles:', profiles);
+
+        const personas = profiles.map(profile => ({
+            persona_type: profile.persona_type,
+            persona_name: profile.persona_name,
+            persona_bio: profile.persona_bio,
+            role: "system",
+            id: profile.persona_type === "General" ? 1 :
+                profile.persona_type === "Fashion" ? 2 :
+                profile.persona_type === "Luxury" ? 3 :
+                profile.persona_type === "Food" ? 4 :
+                profile.persona_type === "Tech" ? 5 : 1
+        }));
+
+        console.log('Transformed personas:', personas);
+        res.json({ success: true, personas });
+    } catch (error) {
+        console.error("Error fetching personas from MongoDB:", error);
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
 // Insert endpoint
 app.post('/api/insert', async (req, res) => {
     try {
