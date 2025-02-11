@@ -268,7 +268,7 @@ export function MessageBar() {
         id: Date.now(),
         uid: currentUser?.uid || 'anonymous',
         userEmail: currentUser?.email || 'anonymous',
-        persona: chat[currentChat]?.persona || null // Add persona information
+        persona: chat[currentChat]?.persona || null
       };
       
       // Create assistant message object
@@ -279,7 +279,7 @@ export function MessageBar() {
         id: Date.now() + 1,
         uid: currentUser?.uid || 'anonymous',
         userEmail: currentUser?.email || 'anonymous',
-        persona: chat[currentChat]?.persona || null // Add persona information
+        persona: chat[currentChat]?.persona || null
       };
 
       // Update chat with both messages immediately
@@ -291,35 +291,49 @@ export function MessageBar() {
       };
       
       setState({ chat: updatedChat });
-      clearTypeing(); // Clear input immediately
+      clearTypeing();
 
-      // Get context messages for the API
       const contextMessages = messages.map(msg => ({
         role: msg.role,
         content: msg.content
       }));
       
-      // Add the new user message to context
       contextMessages.push({
         role: userMessage.role,
         content: userMessage.content
       });
       
+      let finalResponse = ''; // Store the complete response
+
       try {
         await sendChatMessage(
           typeingMessage.content,
           contextMessages,
-          async (response) => {
+          async (response, suggestions) => {
             if (response) {
-              // Create final assistant message with the response
+              finalResponse = response; // Keep track of the complete response
+
+              // Update UI with streaming response
               const finalAssistantMessage = {
                 ...assistantMessage,
                 content: response
               };
 
-              // Store both user and assistant messages after getting the response
+              const latestMessages = [...messages, userMessage, finalAssistantMessage];
+              const newChat = [...chat];
+              newChat[currentChat] = {
+                ...chat[currentChat],
+                messages: latestMessages
+              };
+              
+              setState({ chat: newChat });
+            }
+
+            // If suggestions are present, it means the streaming is complete
+            if (suggestions) {
+              // Now store both messages in MongoDB
               try {
-                // Store user message first
+                // Store user message
                 const userResponse = await fetch("http://localhost:3001/api/chats/store", {
                   method: "POST",
                   headers: {
@@ -338,14 +352,15 @@ export function MessageBar() {
                 
                 console.log('User message stored successfully');
 
-                // Then store assistant message
+                // Store complete assistant message
                 const assistantResponse = await fetch("http://localhost:3001/api/chats/store", {
                   method: "POST",
                   headers: {
                     "Content-Type": "application/json"
                   },
                   body: JSON.stringify({
-                    ...finalAssistantMessage,
+                    ...assistantMessage,
+                    content: finalResponse, // Use the complete response
                     conversationId: currentChat,
                     timestamp: new Date().toISOString()
                   })
@@ -359,20 +374,9 @@ export function MessageBar() {
               } catch (error) {
                 console.error("Failed to store messages:", error);
               }
-
-              // Update the assistant message with the response
-              const latestMessages = [...messages, userMessage, finalAssistantMessage];
-              
-              const newChat = [...chat];
-              newChat[currentChat] = {
-                ...chat[currentChat],
-                messages: latestMessages
-              };
-              
-              setState({ chat: newChat });
             }
           },
-          chat[currentChat]?.persona // Pass the current chat's persona
+          chat[currentChat]?.persona
         );
       } catch (error) {
         console.error('Chat error:', error);

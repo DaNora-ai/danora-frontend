@@ -136,6 +136,7 @@ export function CreateProfileModal({ visible, onClose }) {
       console.log('Sending payload to prompt generator:', payload);
 
       const response = await fetch("http://34.68.23.90:8000/prompt_generator", {
+      // const response = await fetch("http://localhost:8000/prompt_generator", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
