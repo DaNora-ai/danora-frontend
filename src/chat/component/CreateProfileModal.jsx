@@ -162,7 +162,7 @@ export function CreateProfileModal({ visible, onClose }) {
       console.log("Sending profile creation with data:", transformedValues);
 
       const response = await fetch(
-        "http://localhost:3001/api/profiles/create",
+        "http://34.68.23.90:3001/api/profiles/create",
         {
           method: "POST",
           headers: {
@@ -427,7 +427,11 @@ export function CreateProfileModal({ visible, onClose }) {
       </Form.Item>
 
       {/* Persona Type */}
-      <Form.Item name="persona_type" label="Persona Type">
+      <Form.Item 
+        name="persona_type" 
+        label="Persona Type"
+        rules={[{ required: true, message: 'Please select a persona type' }]}
+      >
         <Select placeholder="Select persona type">
           <Select.Option value="general">General</Select.Option>
           <Select.Option value="fashion">Fashion</Select.Option>

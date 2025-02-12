@@ -5,7 +5,7 @@ const client = new MongoClient(uri);
 
 export const insertToMongoDB = async () => {
     try {
-        const response = await fetch('http://localhost:3001/api/insert', {
+        const response = await fetch('http://34.68.23.90:3001/api/insert', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'

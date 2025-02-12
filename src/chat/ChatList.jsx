@@ -25,7 +25,11 @@ export function ListTool(props) {
 
 export function CreateNew() {
   const { newChat } = useGlobal()
-  return <div className={styles.new} onClick={newChat}><Icon type="add" />New Conversations</div>
+  return <div className={styles.new} onClick={() => newChat({
+    title: "New Conversation",
+    desc: "Start a new conversation",
+    role: "user"
+  })}><Icon type="add" />New Conversations</div>
 }
 
 export function ColorIcon({ onChange }) {

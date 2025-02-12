@@ -2,12 +2,72 @@
   padding: 20px;
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  // gap: 24px;
   min-width: 501px;
   max-height: 80vh;
   overflow-y: auto;
   background: var(--background-color);
   color: var(--text-color);
+
+  :global {
+    .ant-steps {
+      .ant-steps-item-title {
+        color: var(--text-color) !important;
+      }
+
+      .ant-steps-item-description {
+        color: var(--text-color-gray) !important;
+      }
+
+      .ant-steps-item-icon {
+        background-color: var(--background-color);
+        border-color: var(--border-color);
+
+        .ant-steps-icon {
+          color: var(--text-color);
+        }
+      }
+
+      .ant-steps-item-process {
+        .ant-steps-item-icon {
+          background-color: var(--primary-color);
+          border-color: var(--primary-color);
+
+          .ant-steps-icon {
+            color: var(--text-color-gray);
+          }
+        }
+      }
+
+      .ant-steps-item-finish {
+        .ant-steps-item-icon {
+          background-color: var(--primary-color);
+          border-color: var(--primary-color);
+
+          .ant-steps-icon {
+            color: var(--text-color-gray);
+          }
+        }
+
+        .ant-steps-item-title {
+          &::after {
+            background-color: var(--primary-color);
+          }
+        }
+      }
+
+      .ant-steps-item-wait {
+        .ant-steps-item-icon {
+          background-color: var(--background-color-gray);
+          border-color: var(--border-color);
+
+          .ant-steps-icon {
+            color: var(--text-color-gray);
+          }
+        }
+      }
+    }
+  }
 
   &::-webkit-scrollbar {
     width: 8px;

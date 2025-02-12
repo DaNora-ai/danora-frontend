@@ -12,4 +12,16 @@
   cursor: pointer;
   display: block;
   font-size: 18px;
+  transition: all 0.3s ease;
+  border-radius: var(--border-radius);
+
+  &:hover {
+    background-color: var(--background-color-gray);
+    color: var(--primary);
+  }
+
+  &.active {
+    background-color: var(--primary);
+    color: #fff;
+  }
 }
