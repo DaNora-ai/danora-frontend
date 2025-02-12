@@ -223,6 +223,8 @@ export function CreateProfileModal({ visible, onClose }) {
           : "Profile created successfully!"
       );
 
+      window.location.reload(); // Add page reload after success
+
       setTimeout(() => {
         form.resetFields();
         setUserDetails(null);
