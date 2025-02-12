@@ -24,47 +24,15 @@ export function CreateProfileModal({ visible, onClose }) {
   const [currentStep, setCurrentStep] = useState(0);
   const [userDetails, setUserDetails] = useState(null);
 
-  // Clear messages when modal opens/closes
   useEffect(() => {
     if (visible) {
       setError("");
       setSuccess("");
       setUserDetails(null);
       setCurrentStep(0);
+      form.resetFields();
     }
   }, [visible]);
-
-  const checkAndLoadProfile = async () => {
-    const user = auth.currentUser;
-    if (user && visible) {
-      try {
-        setError(""); // Clear any previous errors
-        setSuccess(""); // Clear any previous success messages
-        const response = await fetch(
-          `http://localhost:3001/api/profiles/check/${user.uid}`
-        );
-        const data = await response.json();
-        setHasProfile(data.exists);
-
-        if (data.exists) {
-          const profileResponse = await fetch(
-            `http://localhost:3001/api/profiles/${user.uid}`
-          );
-          const profileData = await profileResponse.json();
-          if (profileData.success) {
-            form.setFieldsValue(profileData.profile);
-          }
-        }
-      } catch (error) {
-        console.error("Error checking/loading profile:", error);
-        setError("Error loading profile data");
-      }
-    }
-  };
-
-  useEffect(() => {
-    checkAndLoadProfile();
-  }, [visible, form]);
 
   const handleNext = async (e) => {
     e.preventDefault(); // Prevent form submission
@@ -184,10 +152,6 @@ export function CreateProfileModal({ visible, onClose }) {
       // Transform comma-separated strings into arrays
       const transformedValues = {
         ...combinedValues,
-        // persona_traits: values.persona_traits ? values.persona_traits.split(',').map(s => s.trim()) : [],
-        // response_behavior: values.response_behavior ? values.response_behavior.split(',').map(s => s.trim()) : [],
-        // knowledge_base: values.knowledge_base ? values.knowledge_base.split(',').map(s => s.trim()) : [],
-        // memory_settings: values.memory_settings ? values.memory_settings.split(',').map(s => s.trim()) : [],
       };
 
       // Handle file upload if profile picture is present
@@ -195,7 +159,7 @@ export function CreateProfileModal({ visible, onClose }) {
         transformedValues.profile_picture = values.profile_picture[0].name;
       }
 
-      console.log("Sending profile update with data:", transformedValues);
+      console.log("Sending profile creation with data:", transformedValues);
 
       const response = await fetch(
         "http://localhost:3001/api/profiles/create",
@@ -210,20 +174,16 @@ export function CreateProfileModal({ visible, onClose }) {
 
       if (!response.ok) {
         const errorData = await response.json();
-        console.error("Profile update failed:", errorData);
-        throw new Error(errorData.error || "Failed to save profile data");
+        console.error("Profile creation failed:", errorData);
+        throw new Error(errorData.error || "Failed to create profile");
       }
 
       const data = await response.json();
       console.log("Profile saved to MongoDB:", data);
 
-      setSuccess(
-        hasProfile
-          ? "Profile updated successfully!"
-          : "Profile created successfully!"
-      );
+      setSuccess("Profile created successfully!");
 
-      window.location.reload(); // Add page reload after success
+      window.location.reload();
 
       setTimeout(() => {
         form.resetFields();
