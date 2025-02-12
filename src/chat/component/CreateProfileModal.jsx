@@ -471,7 +471,7 @@ export function CreateProfileModal({ visible, onClose }) {
           <Select.Option value="fashion">Fashion</Select.Option>
           <Select.Option value="luxury">Luxury</Select.Option>
           <Select.Option value="food">Food</Select.Option>
-          <Select.Option value="tech">Tech</Select.Option>
+          <Select.Option value="technology">Technology</Select.Option>
         </Select>
       </Form.Item>
 

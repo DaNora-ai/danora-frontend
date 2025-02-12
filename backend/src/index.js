@@ -141,7 +141,7 @@ app.get('/api/personas/:uid/:email', async (req, res) => {
                 profile.persona_type === "Fashion" ? 2 :
                 profile.persona_type === "Luxury" ? 3 :
                 profile.persona_type === "Food" ? 4 :
-                profile.persona_type === "Tech" ? 5 : 1
+                profile.persona_type === "Technology" ? 5 : 1
         }));
 
         console.log('Transformed personas:', personas);

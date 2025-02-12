@@ -22,7 +22,7 @@ export const initApps = {
       id: 4,
     },
     {
-      title: "Tech",
+      title: "Technology",
       icon: "programming",
       id: 5,
     },
