@@ -245,3 +245,38 @@
   font-size: 14px;
   text-align: center;
 }
+
+.suggestions {
+  margin-top: 16px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border-color);
+}
+
+.suggestion_button {
+  background-color: var(--background-color-gray);
+  border: 1px solid var(--border-color);
+  border-radius: 20px;
+  padding: 8px 16px;
+  font-size: 14px;
+  color: var(--text-color);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 32px;
+
+  &:hover {
+    background-color: var(--primary);
+    border-color: var(--primary);
+    color: white;
+  }
+
+  &:active {
+    transform: scale(0.98);
+  }
+}

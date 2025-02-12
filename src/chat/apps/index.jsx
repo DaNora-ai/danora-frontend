@@ -3,8 +3,10 @@ import { AppsProvide, useApps } from './context'
 import { classnames } from '@/components/utils'
 import { useGlobal } from '../context'
 import styles from './apps.module.less'
-import { Search } from '../../components'
+import { Search, Button } from '@/components'
 import { auth } from '../context/firebase'
+import { useAuth } from '../context/AuthContext'
+import { CreateProfileModal } from '../component/CreateProfileModal'
 
 export function AppItem(props) {
   const { newChat } = useGlobal();
@@ -78,12 +80,37 @@ export function Category(props) {
 }
 
 export function AppContainer() {
-  const { category } = useApps()
+  const { category } = useApps();
+  const [createProfileModalVisible, setCreateProfileModalVisible] = useState(false);
+  const { currentUser } = useAuth();
+
+  const handleCreatePersona = () => {
+    if (!currentUser) {
+      // TODO: Show login prompt
+      return;
+    }
+    setCreateProfileModalVisible(true);
+  };
+
   return (
     <div className={styles.apps}>
       {category.map((item, index) => <Category index={index} {...item} key={item.id} />)}
+      <div className={styles.create_persona}>
+        <Button
+          type="primary"
+          icon="add"
+          block
+          onClick={handleCreatePersona}
+        >
+          Create Persona
+        </Button>
+      </div>
+      <CreateProfileModal
+        visible={createProfileModalVisible}
+        onClose={() => setCreateProfileModalVisible(false)}
+      />
     </div>
-  )
+  );
 }
 
 export function Apps() {

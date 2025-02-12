@@ -200,23 +200,15 @@ export function EditorMessage() {
 }
 
 export function MessageItem(props) {
-  const { content, sentTime, role } = props;
-  const { removeMessage } = useGlobal();
+  const { content, sentTime, role, suggestions } = props;
+  const { removeMessage, setMessage } = useGlobal();
   return (
     <div className={classnames(styles.item, styles[role])}>
       <Avatar src={role !== "user" && avatar} />
       <div className={classnames(styles.item_content, styles[`item_${role}`])}>
         <div className={styles.item_inner}>
           <div className={styles.item_tool}>
-            {/* <div className={styles.item_date}>{dateFormat(sentTime)}</div> */}
             <div className={styles.item_bar}>
-              {/* <Tooltip text="Remove Messages">
-                <Icon
-                  className={styles.icon}
-                  type="trash"
-                  onClick={removeMessage}
-                />
-              </Tooltip> */}
               {role === "user" ? (
                 <React.Fragment>
                   <Icon className={styles.icon} type="reload" />
@@ -228,6 +220,22 @@ export function MessageItem(props) {
             </div>
           </div>
           <MessageRender>{content}</MessageRender>
+          {role === 'assistant' && suggestions && suggestions.length > 0 && (
+            <div className={styles.suggestions}>
+              {suggestions.map((suggestion, index) => (
+                <Button
+                  key={index}
+                  type="text"
+                  className={styles.suggestion_button}
+                  onClick={() => {
+                    setMessage(suggestion);
+                  }}
+                >
+                  {suggestion}
+                </Button>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </div>
@@ -313,10 +321,14 @@ export function MessageBar() {
             if (response) {
               finalResponse = response; // Keep track of the complete response
 
+              // Remove suggestions from the response content if they appear there
+              const cleanResponse = response.replace(/What kind of pasta.*$/, '').trim();
+
               // Update UI with streaming response
               const finalAssistantMessage = {
                 ...assistantMessage,
-                content: response
+                content: cleanResponse,
+                suggestions: suggestions || [] // Add suggestions to the message
               };
 
               const latestMessages = [...messages, userMessage, finalAssistantMessage];

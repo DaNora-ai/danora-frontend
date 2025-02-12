@@ -42,7 +42,7 @@ app.post('/api/users/create', async (req, res) => {
 // Create user profile endpoint
 app.post('/api/profiles/create', async (req, res) => {
     try {
-        console.log('Received profile update request with data:', req.body);
+        console.log('Received profile creation request with data:', req.body);
         
         const { getDB } = require('./config/db');
         const db = await getDB();
@@ -51,30 +51,17 @@ app.post('/api/profiles/create', async (req, res) => {
         const profileData = {
             ...req.body,
             createdAt: new Date(),
-            updatedAt: new Date()
+            updatedAt: new Date(),
+            profileId: new Date().getTime().toString() // Add unique profile ID
         };
         
-        // Check if profile already exists for this user
-        const existingProfile = await collection.findOne({ uid: profileData.uid });
-        console.log('Existing profile found:', existingProfile ? 'Yes' : 'No');
-        
-        let result;
-        if (existingProfile) {
-            // Update existing profile
-            result = await collection.updateOne(
-                { uid: profileData.uid },
-                { $set: { ...profileData, updatedAt: new Date() } }
-            );
-            console.log('Profile update result:', result);
-        } else {
-            // Create new profile
-            result = await collection.insertOne(profileData);
-            console.log('Profile creation result:', result);
-        }
+        // Always create a new profile
+        const result = await collection.insertOne(profileData);
+        console.log('Profile creation result:', result);
         
         res.json({ success: true, result });
     } catch (error) {
-        console.error("Error creating/updating profile in MongoDB:", error);
+        console.error("Error creating profile in MongoDB:", error);
         res.status(500).json({ success: false, error: error.message });
     }
 });
@@ -101,14 +88,10 @@ app.get('/api/profiles/:uid', async (req, res) => {
         const db = await getDB();
         const collection = db.collection("Profiles");
         
-        const profile = await collection.findOne({ uid: req.params.uid });
-        if (profile) {
-            res.json({ success: true, profile });
-        } else {
-            res.status(404).json({ success: false, error: 'Profile not found' });
-        }
+        const profiles = await collection.find({ uid: req.params.uid }).toArray();
+        res.json({ success: true, profiles });
     } catch (error) {
-        console.error("Error fetching profile from MongoDB:", error);
+        console.error("Error fetching profiles from MongoDB:", error);
         res.status(500).json({ success: false, error: error.message });
     }
 });
