@@ -53,6 +53,7 @@ export function CreateProfileModal({ visible, onClose }) {
         budget: values.budget,
         purchase_frequency: values.purchase_frequency,
         loyalty_program_participation: values.loyalty_program_participation,
+        company_website: values.company_website,
       });
 
       setCurrentStep(currentStep + 1);
@@ -67,12 +68,10 @@ export function CreateProfileModal({ visible, onClose }) {
   };
 
   const handleGenerateChat = async (e) => {
-    e.preventDefault(); // Prevent form submission
+    e.preventDefault();
     try {
-      // Get all form values
       const values = form.getFieldsValue();
       
-      // Prepare the payload with persona details
       const payload = {
         // User Details (from stored state)
         age_range: userDetails?.age_range || "",
@@ -81,6 +80,7 @@ export function CreateProfileModal({ visible, onClose }) {
         income_level: userDetails?.income_level || "",
         job_title: userDetails?.job_title || "",
         industry: userDetails?.industry || "",
+        company_website: userDetails?.company_website || "",
 
         // Persona Details
         persona_name: values.persona_name || "",
@@ -251,6 +251,19 @@ export function CreateProfileModal({ visible, onClose }) {
           <Select.Option value="medium">Medium</Select.Option>
           <Select.Option value="large">Large</Select.Option>
         </Select>
+      </Form.Item>
+
+      <Form.Item 
+        name="company_website" 
+        label="Company Website"
+        rules={[
+          { 
+            type: 'url',
+            message: 'Please enter a valid URL'
+          }
+        ]}
+      >
+        <Input placeholder="Enter company website URL" />
       </Form.Item>
 
       {/* Purchase Preferences */}
