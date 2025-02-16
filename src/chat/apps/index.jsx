@@ -108,6 +108,7 @@ export function AppContainer() {
       <CreateProfileModal
         visible={createProfileModalVisible}
         onClose={() => setCreateProfileModalVisible(false)}
+        isPersonaOnly={true}
       />
     </div>
   );

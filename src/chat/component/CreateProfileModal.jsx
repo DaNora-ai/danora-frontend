@@ -16,12 +16,12 @@ import styles from "./CreateProfileModal.module.less";
 
 const { TextArea } = Input;
 
-export function CreateProfileModal({ visible, onClose }) {
+export function CreateProfileModal({ visible, onClose, isPersonaOnly = false }) {
   const [form] = Form.useForm();
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [hasProfile, setHasProfile] = useState(false);
-  const [currentStep, setCurrentStep] = useState(0);
+  const [currentStep, setCurrentStep] = useState(isPersonaOnly ? 1 : 0);
   const [userDetails, setUserDetails] = useState(null);
 
   useEffect(() => {
@@ -29,10 +29,10 @@ export function CreateProfileModal({ visible, onClose }) {
       setError("");
       setSuccess("");
       setUserDetails(null);
-      setCurrentStep(0);
+      setCurrentStep(isPersonaOnly ? 1 : 0);
       form.resetFields();
     }
-  }, [visible]);
+  }, [visible, isPersonaOnly]);
 
   const handleNext = async (e) => {
     e.preventDefault(); // Prevent form submission
@@ -49,6 +49,8 @@ export function CreateProfileModal({ visible, onClose }) {
         job_title: values.job_title,
         industry: values.industry,
         company_size: values.company_size,
+        company_bio: values.company_bio,
+        company_url: values.company_url,
         preferred_products_services: values.preferred_products_services,
         budget: values.budget,
         purchase_frequency: values.purchase_frequency,
@@ -197,64 +199,79 @@ export function CreateProfileModal({ visible, onClose }) {
 
   const renderUserDetailsStep = () => (
     <>
-      {/* Demographics */}
-      <Divider orientation="left">Demographics</Divider>
-      <Form.Item name="age_range" label="Age Range">
-        <Select placeholder="Select age range">
-          <Select.Option value="18-24">18-24</Select.Option>
-          <Select.Option value="25-34">25-34</Select.Option>
-          <Select.Option value="35-44">35-44</Select.Option>
-          <Select.Option value="45-54">45-54</Select.Option>
-          <Select.Option value="55+">55+</Select.Option>
-        </Select>
-      </Form.Item>
-
-      <Form.Item name="gender_identity" label="Gender Identity">
-        <Select placeholder="Select gender identity">
-          <Select.Option value="male">Male</Select.Option>
-          <Select.Option value="female">Female</Select.Option>
-          <Select.Option value="non-binary">Non-binary</Select.Option>
-          <Select.Option value="other">Other</Select.Option>
-          <Select.Option value="prefer-not-to-say">
-            Prefer not to say
-          </Select.Option>
-        </Select>
-      </Form.Item>
-
-      <Form.Item name="location" label="Location">
-        <Input placeholder="Enter location" />
-      </Form.Item>
-
-      <Form.Item name="income_level" label="Income Level">
-        <Select placeholder="Select income level">
-          <Select.Option value="entry">Entry Level</Select.Option>
-          <Select.Option value="mid">Mid Level</Select.Option>
-          <Select.Option value="senior">Senior Level</Select.Option>
-          <Select.Option value="executive">Executive Level</Select.Option>
-        </Select>
-      </Form.Item>
-
       {/* Professional Information */}
       <Divider orientation="left">Professional Information</Divider>
       <Form.Item name="job_title" label="Job Title">
-        <Input placeholder="Enter job title" />
-      </Form.Item>
-
-      <Form.Item name="industry" label="Industry">
-        <Input placeholder="Enter industry" />
-      </Form.Item>
-
-      <Form.Item name="company_size" label="Company Size">
-        <Select placeholder="Select company size">
-          <Select.Option value="startup">Startup</Select.Option>
-          <Select.Option value="small">Small</Select.Option>
-          <Select.Option value="medium">Medium</Select.Option>
-          <Select.Option value="large">Large</Select.Option>
+        <Select placeholder="Select job title">
+          <Select.Option value="founder_ceo">Founder/CEO</Select.Option>
+          <Select.Option value="cmo">CMO</Select.Option>
+          <Select.Option value="vp_marketing">VP Marketing</Select.Option>
+          <Select.Option value="marketing_ops">Marketing Ops</Select.Option>
+          <Select.Option value="product_marketing">Product Marketing</Select.Option>
+          <Select.Option value="social_media_manager">Social Media Manager</Select.Option>
+          <Select.Option value="demand_gen">Demand Gen/Acquisition</Select.Option>
+          <Select.Option value="content_marketing">Content Marketing</Select.Option>
+          <Select.Option value="other">Other</Select.Option>
         </Select>
       </Form.Item>
 
+      {/* <Form.Item name="industry" label="Industry">
+        <Input placeholder="Enter industry" />
+      </Form.Item> */}
+
+      <Form.Item name="company_size" label="Company Size">
+        <Select placeholder="Select company size">
+          <Select.Option value="just_me">Just Me</Select.Option>
+          <Select.Option value="2-10">2-10</Select.Option>
+          <Select.Option value="11-50">11-50</Select.Option>
+          <Select.Option value="51-100">51-100</Select.Option>
+          <Select.Option value="101-500">101-500</Select.Option>
+          <Select.Option value="501-1000">501-1000</Select.Option>
+          <Select.Option value="1000+">1000+</Select.Option>
+        </Select>
+      </Form.Item>
+
+      <Form.Item 
+        name="company_url" 
+        label="Company URL"
+        rules={[
+          { type: 'url', message: 'Please enter a valid URL' },
+          { required: true, message: 'Please enter your company URL' }
+        ]}
+      >
+        <Input placeholder="Enter company website URL" />
+      </Form.Item>
+
+      <Form.Item
+        name="company_bio"
+        label="Company Bio"
+        rules={[
+          {
+            validator: (_, value) => {
+              if (!value) return Promise.resolve();
+              const wordCount = value.trim().split(/\s+/).length;
+              if (wordCount > 100) {
+                return Promise.reject('Bio cannot exceed 100 words');
+              }
+              return Promise.resolve();
+            }
+          }
+        ]}
+      >
+        <TextArea
+          rows={4}
+          placeholder="Tell us about your company (maximum 100 words)"
+          showCount={{
+            formatter: ({ value = '' }) => {
+              const words = value.trim().split(/\s+/).length;
+              return `${words}/100 words`;
+            }
+          }}
+        />
+      </Form.Item>
+
       {/* Purchase Preferences */}
-      <Divider orientation="left">Purchase Preferences</Divider>
+      {/* <Divider orientation="left">Purchase Preferences</Divider>
       <Form.Item
         name="preferred_products_services"
         label="Preferred Products/Services"
@@ -263,31 +280,7 @@ export function CreateProfileModal({ visible, onClose }) {
           rows={3}
           placeholder="Enter preferred products and services"
         />
-      </Form.Item>
-
-      <Form.Item name="budget" label="Budget">
-        <Select placeholder="Select budget range">
-          <Select.Option value="low">Low</Select.Option>
-          <Select.Option value="medium">Medium</Select.Option>
-          <Select.Option value="high">High</Select.Option>
-        </Select>
-      </Form.Item>
-
-      <Form.Item name="purchase_frequency" label="Purchase Frequency">
-        <Select placeholder="Select purchase frequency">
-          <Select.Option value="rarely">Rarely</Select.Option>
-          <Select.Option value="occasionally">Occasionally</Select.Option>
-          <Select.Option value="frequently">Frequently</Select.Option>
-        </Select>
-      </Form.Item>
-
-      <Form.Item
-        name="loyalty_program_participation"
-        label="Loyalty Program Participation"
-        valuePropName="checked"
-      >
-        <Switch />
-      </Form.Item>
+      </Form.Item> */}
     </>
   );
 
@@ -307,6 +300,20 @@ export function CreateProfileModal({ visible, onClose }) {
         ]}
       >
         <Input placeholder="Enter your name" />
+      </Form.Item>
+
+      <Form.Item
+        name="persona_type"
+        label="Persona Type"
+        rules={[{ required: true, message: "Please select a persona type" }]}
+      >
+        <Select placeholder="Select persona type">
+          <Select.Option value="general">General</Select.Option>
+          <Select.Option value="fashion">Fashion</Select.Option>
+          <Select.Option value="luxury">Luxury</Select.Option>
+          <Select.Option value="food">Food</Select.Option>
+          <Select.Option value="technology">Technology</Select.Option>
+        </Select>
       </Form.Item>
 
       <Form.Item
@@ -341,23 +348,63 @@ export function CreateProfileModal({ visible, onClose }) {
         <TextArea rows={4} placeholder="Tell us about yourself" />
       </Form.Item>
 
-      <Form.Item name="persona_pronouns" label="Pronouns">
+      {/* <Form.Item name="persona_pronouns" label="Pronouns">
         <Select placeholder="Select pronouns">
           <Select.Option value="he/him">He/Him</Select.Option>
           <Select.Option value="she/her">She/Her</Select.Option>
           <Select.Option value="they/them">They/Them</Select.Option>
           <Select.Option value="other">Other</Select.Option>
         </Select>
-      </Form.Item>
+      </Form.Item> */}
 
-      <Form.Item name="profile_picture" label="Profile Picture">
+      <Form.Item name="profile_picture" label="Persona Profile">
         <Upload>
           <Button icon={<UploadOutlined />}>Upload Picture</Button>
         </Upload>
       </Form.Item>
 
-      <Form.Item name="avatar_description" label="Avatar Description">
+      {/* <Form.Item name="avatar_description" label="Avatar Description">
         <Input placeholder="Describe your avatar" />
+      </Form.Item> */}
+
+      {/* Purchase Preferences */}
+      <Divider orientation="left">Purchase Preferences</Divider>
+      <Form.Item
+        name="preferred_products_services"
+        label="Preferred Products/Services"
+      >
+        <TextArea
+          rows={3}
+          placeholder="Enter preferred products and services"
+        />
+      </Form.Item>
+
+      <Form.Item name="budget" label="Budget">
+        <Select placeholder="Select budget range">
+          <Select.Option value="low">Low ($1,000 - $10,000)</Select.Option>
+          <Select.Option value="medium">
+            Medium ($10,000 - $50,000)
+          </Select.Option>
+          <Select.Option value="high">High ($50,000+)</Select.Option>
+        </Select>
+      </Form.Item>
+
+      <Form.Item name="purchase_frequency" label="Purchase Frequency">
+        <Select placeholder="Select purchase frequency">
+          <Select.Option value="rarely">Rarely (Once a year)</Select.Option>
+          <Select.Option value="occasionally">
+            Occasionally (Quarterly)
+          </Select.Option>
+          <Select.Option value="frequently">Frequently (Monthly)</Select.Option>
+        </Select>
+      </Form.Item>
+
+      <Form.Item
+        name="loyalty_program_participation"
+        label="Loyalty Program Participation"
+        valuePropName="checked"
+      >
+        <Switch />
       </Form.Item>
 
       {/* Communication Style */}
@@ -427,7 +474,7 @@ export function CreateProfileModal({ visible, onClose }) {
       </Form.Item>
 
       {/* Persona Type */}
-      <Form.Item 
+      {/* <Form.Item 
         name="persona_type" 
         label="Persona Type"
         rules={[{ required: true, message: 'Please select a persona type' }]}
@@ -439,24 +486,23 @@ export function CreateProfileModal({ visible, onClose }) {
           <Select.Option value="food">Food</Select.Option>
           <Select.Option value="technology">Technology</Select.Option>
         </Select>
-      </Form.Item>
+      </Form.Item> */}
 
       {/* Persona Prompt */}
       <Divider orientation="left">Persona Prompt</Divider>
       <Form.Item
         name="persona_prompt"
         label={
-          <Space>
-            Persona Prompt
-            <Button 
-              type="primary" 
-              size="small" 
+          
+            <Button
+              type="primary"
+              size="small"
               onClick={handleGenerateChat}
               htmlType="button" // Explicitly set button type to prevent form submission
             >
-              Generate Prompt
+              Generate Description
             </Button>
-          </Space>
+          
         }
       >
         <TextArea
@@ -475,28 +521,28 @@ export function CreateProfileModal({ visible, onClose }) {
         setSuccess("");
         onClose();
       }}
-      title={hasProfile ? "Edit Profile" : "Create Profile"}
+      title={hasProfile ? "Edit Profile" : (isPersonaOnly ? "Create Persona" : "Create Profile")}
     >
       <div className={styles.profileContainer}>
-        <Steps
-          current={currentStep}
-          items={[{ title: "User Details" }, { title: "Persona Details" }]}
-          style={{ marginBottom: "24px" }}
-        />
+        {!isPersonaOnly && (
+          <Steps
+            current={currentStep}
+            items={[{ title: "Business Details" }, { title: "Persona Details" }]}
+            style={{ marginBottom: "24px" }}
+          />
+        )}
 
         <Form
           form={form}
           layout="vertical"
           onFinish={handleUpdateProfile}
           className={styles.form}
-          onSubmit={(e) => e.preventDefault()} // Prevent default form submission
+          onSubmit={(e) => e.preventDefault()}
         >
-          {currentStep === 0
-            ? renderUserDetailsStep()
-            : renderPersonaDetailsStep()}
+          {isPersonaOnly ? renderPersonaDetailsStep() : (currentStep === 0 ? renderUserDetailsStep() : renderPersonaDetailsStep())}
 
           <Form.Item style={{ textAlign: "center", marginTop: "24px" }}>
-            {currentStep > 0 && (
+            {!isPersonaOnly && currentStep > 0 && (
               <Button
                 onClick={handlePrevious}
                 style={{ marginRight: "8px" }}
@@ -505,7 +551,7 @@ export function CreateProfileModal({ visible, onClose }) {
                 Previous
               </Button>
             )}
-            {currentStep < 1 ? (
+            {!isPersonaOnly && currentStep < 1 ? (
               <Button type="primary" onClick={handleNext} htmlType="button">
                 Next
               </Button>
@@ -520,7 +566,7 @@ export function CreateProfileModal({ visible, onClose }) {
                   height: "40px",
                 }}
               >
-                {hasProfile ? "Save Changes" : "Create Profile"}
+                {hasProfile ? "Save Changes" : (isPersonaOnly ? "Create Persona" : "Create Profile")}
               </Button>
             )}
           </Form.Item>
