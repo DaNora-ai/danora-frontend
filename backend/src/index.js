@@ -46,20 +46,47 @@ app.post('/api/profiles/create', async (req, res) => {
         
         const { getDB } = require('./config/db');
         const db = await getDB();
-        const collection = db.collection("Profiles");
+        const profilesCollection = db.collection("Profiles");
+        const businessCollection = db.collection("Business-details");
+
+        console.log("req.body", req.body);
+        
+        // Extract business-specific fields
+        const { uid, job_title, company_size, company_url, company_bio, ...otherProfileData } = req.body;
         
         const profileData = {
-            ...req.body,
+            ...otherProfileData,
+            uid, // Keep uid in profile data for reference
             createdAt: new Date(),
             updatedAt: new Date(),
-            profileId: new Date().getTime().toString() // Add unique profile ID
+            profileId: new Date().getTime().toString()
+        };
+
+        // Create business details object
+        const businessData = {
+            uid,
+            job_title,
+            company_size,
+            company_url,
+            company_bio,
+            createdAt: new Date(),
+            updatedAt: new Date()
         };
         
-        // Always create a new profile
-        const result = await collection.insertOne(profileData);
-        console.log('Profile creation result:', result);
+        // Store profile data
+        const profileResult = await profilesCollection.insertOne(profileData);
         
-        res.json({ success: true, result });
+        // Store business details
+        const businessResult = await businessCollection.insertOne(businessData);
+        
+        console.log('Profile creation result:', profileResult);
+        console.log('Business details creation result:', businessResult);
+        
+        res.json({ 
+            success: true, 
+            profile: profileResult,
+            businessDetails: businessResult 
+        });
     } catch (error) {
         console.error("Error creating profile in MongoDB:", error);
         res.status(500).json({ success: false, error: error.message });
