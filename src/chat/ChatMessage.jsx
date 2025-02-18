@@ -129,7 +129,7 @@ export function MessageHeader() {
               onClick={() => setCreateProfileModalVisible(true)}
               className={styles.createProfileButton}
             >
-              Create Persona
+              Create Profile
             </Button>
           )}
           </div>

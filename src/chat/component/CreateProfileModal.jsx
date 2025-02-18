@@ -304,7 +304,7 @@ export function CreateProfileModal({ visible, onClose, isPersonaOnly = false }) 
 
       <Form.Item
         name="persona_type"
-        label="Persona Type"
+        label="Persona Expertise"
         rules={[{ required: true, message: "Please select a persona type" }]}
       >
         <Select placeholder="Select persona type">
@@ -318,7 +318,7 @@ export function CreateProfileModal({ visible, onClose, isPersonaOnly = false }) 
 
       <Form.Item
         name="persona_role"
-        label="Role"
+        label="Primary Role"
         rules={[
           {
             required: true,
@@ -327,11 +327,11 @@ export function CreateProfileModal({ visible, onClose, isPersonaOnly = false }) 
           },
         ]}
       >
-        <Input placeholder="Enter your role" />
+        <Input placeholder="e.g. Marketing Manager, Product Manager, Sales Representative" />
       </Form.Item>
 
       <Form.Item name="persona_traits" label="Traits (comma-separated)">
-        <Input placeholder="Enter traits, separated by commas" />
+        <Input placeholder="e.g. Detail-Oriented, Creative, Friendly, Optimistic" />
       </Form.Item>
 
       <Form.Item
@@ -345,7 +345,7 @@ export function CreateProfileModal({ visible, onClose, isPersonaOnly = false }) 
           },
         ]}
       >
-        <TextArea rows={4} placeholder="Tell us about yourself" />
+        <TextArea rows={4} placeholder="e.g. I'm a detail-oriented, creative, friendly, and optimistic person." />
       </Form.Item>
 
       {/* <Form.Item name="persona_pronouns" label="Pronouns">
@@ -357,7 +357,7 @@ export function CreateProfileModal({ visible, onClose, isPersonaOnly = false }) 
         </Select>
       </Form.Item> */}
 
-      <Form.Item name="profile_picture" label="Persona Profile">
+      <Form.Item name="profile_picture" label="Persona Photo">
         <Upload>
           <Button icon={<UploadOutlined />}>Upload Picture</Button>
         </Upload>
@@ -375,7 +375,7 @@ export function CreateProfileModal({ visible, onClose, isPersonaOnly = false }) 
       >
         <TextArea
           rows={3}
-          placeholder="Enter preferred products and services"
+          placeholder="e.g. Luxury handbags, Organic skincare, Tech gadgets"
         />
       </Form.Item>
 
@@ -443,17 +443,25 @@ export function CreateProfileModal({ visible, onClose, isPersonaOnly = false }) 
         </Select>
       </Form.Item>
 
+      <Form.Item name="interaction_style" label="Interaction Style">
+        <Select placeholder="Select interaction style">
+          <Select.Option value="direct">Direct</Select.Option>
+          <Select.Option value="collaborative">Collaborative</Select.Option>
+          <Select.Option value="supportive">Supportive</Select.Option>
+        </Select>
+      </Form.Item>
+
       {/* Chat Behavior */}
-      <Divider orientation="left">Chat Behavior</Divider>
+      {/* <Divider orientation="left">Chat Behavior</Divider>
       <Form.Item
         name="response_behavior"
         label="Response Behavior (comma-separated)"
       >
         <Input placeholder="Enter response behaviors, separated by commas" />
-      </Form.Item>
+      </Form.Item> */}
 
       {/* Advanced Settings */}
-      <Divider orientation="left">Advanced Settings</Divider>
+      {/* <Divider orientation="left">Advanced Settings</Divider>
       <Form.Item name="knowledge_base" label="Knowledge Base (comma-separated)">
         <Input placeholder="Enter knowledge base topics, separated by commas" />
       </Form.Item>
@@ -471,7 +479,7 @@ export function CreateProfileModal({ visible, onClose, isPersonaOnly = false }) 
           <Select.Option value="collaborative">Collaborative</Select.Option>
           <Select.Option value="supportive">Supportive</Select.Option>
         </Select>
-      </Form.Item>
+      </Form.Item> */}
 
       {/* Persona Type */}
       {/* <Form.Item 
@@ -489,7 +497,7 @@ export function CreateProfileModal({ visible, onClose, isPersonaOnly = false }) 
       </Form.Item> */}
 
       {/* Persona Prompt */}
-      <Divider orientation="left">Persona Prompt</Divider>
+      {/* <Divider orientation="left">Persona Prompt</Divider> */}
       <Form.Item
         name="persona_prompt"
         label={
@@ -500,7 +508,7 @@ export function CreateProfileModal({ visible, onClose, isPersonaOnly = false }) 
               onClick={handleGenerateChat}
               htmlType="button" // Explicitly set button type to prevent form submission
             >
-              Generate Description
+              Generate Persona Description
             </Button>
           
         }
@@ -524,13 +532,13 @@ export function CreateProfileModal({ visible, onClose, isPersonaOnly = false }) 
       title={hasProfile ? "Edit Profile" : (isPersonaOnly ? "Create Persona" : "Create Profile")}
     >
       <div className={styles.profileContainer}>
-        {!isPersonaOnly && (
+        {/* {!isPersonaOnly && (
           <Steps
             current={currentStep}
             items={[{ title: "Business Details" }, { title: "Persona Details" }]}
             style={{ marginBottom: "24px" }}
           />
-        )}
+        )} */}
 
         <Form
           form={form}
@@ -541,7 +549,13 @@ export function CreateProfileModal({ visible, onClose, isPersonaOnly = false }) 
         >
           {isPersonaOnly ? renderPersonaDetailsStep() : (currentStep === 0 ? renderUserDetailsStep() : renderPersonaDetailsStep())}
 
-          <Form.Item style={{ textAlign: "center", marginTop: "24px" }}>
+          <Form.Item 
+            style={{ 
+              textAlign: "center", 
+              marginTop: "26px",
+              marginBottom: "8px"
+            }}
+          >
             {!isPersonaOnly && currentStep > 0 && (
               <Button
                 onClick={handlePrevious}
@@ -552,9 +566,70 @@ export function CreateProfileModal({ visible, onClose, isPersonaOnly = false }) 
               </Button>
             )}
             {!isPersonaOnly && currentStep < 1 ? (
-              <Button type="primary" onClick={handleNext} htmlType="button">
-                Next
-              </Button>
+              <Space size="large" style={{ width: '100%', justifyContent: 'space-between' }}>
+                <Button 
+                  type="primary" 
+                  onClick={handleNext} 
+                  htmlType="button"
+                  style={{
+                    backgroundColor: "#1890ff",
+                    width: "48%",
+                  }}
+                >
+                  Proceed to create Persona
+                </Button>
+                <Button 
+                  onClick={async () => {
+                    try {
+                      const values = await form.validateFields();
+                      const user = auth.currentUser;
+                      if (!user) {
+                        setError("No user is currently signed in");
+                        return;
+                      }
+
+                      const businessDetails = {
+                        uid: user.uid,
+                        email: user.email,
+                        job_title: values.job_title,
+                        company_size: values.company_size,
+                        company_url: values.company_url,
+                        company_bio: values.company_bio
+                      };
+
+                      const response = await fetch(
+                        "http://34.68.23.90:3001/api/profiles/create",
+                        {
+                          method: "POST",
+                          headers: {
+                            "Content-Type": "application/json",
+                          },
+                          body: JSON.stringify(businessDetails),
+                        }
+                      );
+
+                      if (!response.ok) {
+                        const errorData = await response.json();
+                        throw new Error(errorData.error || "Failed to save business details");
+                      }
+
+                      setSuccess("Business details saved successfully!");
+                      setTimeout(() => {
+                        form.resetFields();
+                        onClose();
+                      }, 1500);
+                    } catch (err) {
+                      setError(err.message);
+                    }
+                  }}
+                  htmlType="button"
+                  style={{
+                    width: "48%",
+                  }}
+                >
+                  Skip {'>>'}
+                </Button>
+              </Space>
             ) : (
               <Button
                 type="primary"
@@ -562,11 +637,13 @@ export function CreateProfileModal({ visible, onClose, isPersonaOnly = false }) 
                 className={styles.createProfileButton}
                 style={{
                   backgroundColor: "#1890ff",
-                  width: "200px",
+                  width: "100%",
                   height: "40px",
+                  // marginTop: "16px",
+                  marginBottom: "68px"
                 }}
               >
-                {hasProfile ? "Save Changes" : (isPersonaOnly ? "Create Persona" : "Create Profile")}
+                {hasProfile ? "Save Changes" : (isPersonaOnly ? "Create Persona" : "Create Persona")}
               </Button>
             )}
           </Form.Item>
