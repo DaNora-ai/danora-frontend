@@ -74,8 +74,18 @@ export function CreateProfileModal({ visible, onClose, isPersonaOnly = false }) 
       // Get all form values
       const values = form.getFieldsValue();
       
+      // Get current user from Firebase auth
+      const user = auth.currentUser;
+      if (!user) {
+        setError("No user is currently signed in");
+        return;
+      }
+
       // Prepare the payload with persona details
       const payload = {
+        // User ID
+        uid: user.uid,
+
         // User Details (from stored state)
         age_range: userDetails?.age_range || "",
         gender: userDetails?.gender_identity || "",
@@ -261,12 +271,12 @@ export function CreateProfileModal({ visible, onClose, isPersonaOnly = false }) 
         <TextArea
           rows={4}
           placeholder="Tell us about your company (maximum 100 words)"
-          showCount={{
-            formatter: ({ value = '' }) => {
-              const words = value.trim().split(/\s+/).length;
-              return `${words}/100 words`;
-            }
-          }}
+          // showCount={{
+          //   formatter: ({ value = '' }) => {
+          //     const words = value.trim().split(/\s+/).length;
+          //     return `${words}/100 words`;
+          //   }
+          // }}
         />
       </Form.Item>
 
@@ -579,9 +589,12 @@ export function CreateProfileModal({ visible, onClose, isPersonaOnly = false }) 
                   Proceed to create Persona
                 </Button>
                 <Button 
-                  onClick={async () => {
+                  onClick={async (e) => {
+                    e.preventDefault(); // Prevent any form submission
+                    e.stopPropagation(); // Stop event propagation
+                    
                     try {
-                      const values = await form.validateFields();
+                      const values = await form.validateFields(['job_title', 'company_size', 'company_url', 'company_bio']);
                       const user = auth.currentUser;
                       if (!user) {
                         setError("No user is currently signed in");

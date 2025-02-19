@@ -54,14 +54,26 @@ app.post('/api/profiles/create', async (req, res) => {
         // Extract business-specific fields
         const { uid, job_title, company_size, company_url, company_bio, ...otherProfileData } = req.body;
         
-        const profileData = {
-            ...otherProfileData,
-            uid, // Keep uid in profile data for reference
-            createdAt: new Date(),
-            updatedAt: new Date(),
-            profileId: new Date().getTime().toString()
-        };
+        // Only proceed with profile creation if there's profile data
+        if (Object.keys(otherProfileData).length > 0) {
+            const profileData = {
+                ...otherProfileData,
+                uid, // Keep uid in profile data for reference
+                createdAt: new Date(),
+                updatedAt: new Date(),
+                profileId: new Date().getTime().toString()
+            };
+            
+            // Store profile data
+            const profileResult = await profilesCollection.insertOne(profileData);
+            console.log('Profile creation result:', profileResult);
+        }
 
+        // Check if business details already exist for this uid
+        const existingBusiness = await businessCollection.findOne({ uid });
+
+        let businessResult;
+        
         // Create business details object
         const businessData = {
             uid,
@@ -69,22 +81,29 @@ app.post('/api/profiles/create', async (req, res) => {
             company_size,
             company_url,
             company_bio,
-            createdAt: new Date(),
             updatedAt: new Date()
         };
+
+        if (existingBusiness) {
+            // Update existing business details
+            businessResult = await businessCollection.updateOne(
+                { uid },
+                { 
+                    $set: {
+                        ...businessData
+                    }
+                }
+            );
+        } else {
+            // Create new business details
+            businessData.createdAt = new Date();
+            businessResult = await businessCollection.insertOne(businessData);
+        }
         
-        // Store profile data
-        const profileResult = await profilesCollection.insertOne(profileData);
-        
-        // Store business details
-        const businessResult = await businessCollection.insertOne(businessData);
-        
-        console.log('Profile creation result:', profileResult);
-        console.log('Business details creation result:', businessResult);
+        console.log('Business details result:', businessResult);
         
         res.json({ 
             success: true, 
-            profile: profileResult,
             businessDetails: businessResult 
         });
     } catch (error) {
