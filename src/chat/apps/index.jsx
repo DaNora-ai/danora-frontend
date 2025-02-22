@@ -7,6 +7,7 @@ import { Search, Button } from '@/components'
 import { auth } from '../context/firebase'
 import { useAuth } from '../context/AuthContext'
 import { CreateProfileModal } from '../component/CreateProfileModal'
+import { message as antMessage } from 'antd'
 
 export function AppItem(props) {
   const { newChat } = useGlobal();
@@ -100,7 +101,14 @@ export function AppContainer() {
           type="primary"
           icon="add"
           block
-          onClick={handleCreatePersona}
+          onClick={() => {
+            const user = auth.currentUser;
+            if (!user) {
+              antMessage.error('Please login to create a persona');
+              return;
+            }
+            setCreateProfileModalVisible(true);
+          }}
         >
           Create Persona
         </Button>

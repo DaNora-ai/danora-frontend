@@ -341,7 +341,7 @@ export function CreateProfileModal({ visible, onClose, isPersonaOnly = false }) 
           },
         ]}
       >
-        <Input placeholder="e.g. Marketing Manager, Product Manager, Sales Representative" />
+        <Input placeholder="e.g. Student, Freelancer, Software Engineer" />
       </Form.Item>
 
       <Form.Item name="persona_traits" label="Traits (comma-separated)">
@@ -359,7 +359,10 @@ export function CreateProfileModal({ visible, onClose, isPersonaOnly = false }) 
           },
         ]}
       >
-        <TextArea rows={4} placeholder="e.g. I'm a detail-oriented, creative, friendly, and optimistic person." />
+        <TextArea
+          rows={4}
+          placeholder="e.g. I'm deeply invested in making the world a better place. I keep up with ethical brands, sustainability hacks, and grassroots activism."
+        />
       </Form.Item>
 
       {/* <Form.Item name="persona_pronouns" label="Pronouns">
@@ -371,11 +374,11 @@ export function CreateProfileModal({ visible, onClose, isPersonaOnly = false }) 
         </Select>
       </Form.Item> */}
 
-      <Form.Item name="profile_picture" label="Persona Photo">
+      {/* <Form.Item name="profile_picture" label="Persona Photo">
         <Upload>
           <Button icon={<UploadOutlined />}>Upload Picture</Button>
         </Upload>
-      </Form.Item>
+      </Form.Item> */}
 
       {/* <Form.Item name="avatar_description" label="Avatar Description">
         <Input placeholder="Describe your avatar" />
@@ -389,7 +392,7 @@ export function CreateProfileModal({ visible, onClose, isPersonaOnly = false }) 
       >
         <TextArea
           rows={3}
-          placeholder="e.g. Luxury handbags, Organic skincare, Tech gadgets"
+          placeholder="e.g. Sustainable, Handmade, Trousers, Nike"
         />
       </Form.Item>
 
@@ -515,15 +518,15 @@ export function CreateProfileModal({ visible, onClose, isPersonaOnly = false }) 
       <Form.Item
         name="persona_prompt"
         label={
-            <Button
-              type="primary"
-              size="small"
-              onClick={handleGenerateChat}
-              loading={isGenerating}
-              htmlType="button"
-            >
-              {isGenerating ? 'Generating...' : 'Generate Persona Description'}
-            </Button>
+          <Button
+            type="primary"
+            size="small"
+            onClick={handleGenerateChat}
+            loading={isGenerating}
+            htmlType="button"
+          >
+            {isGenerating ? "Generating..." : "Generate Persona Description"}
+          </Button>
         }
       >
         <TextArea
@@ -542,7 +545,7 @@ export function CreateProfileModal({ visible, onClose, isPersonaOnly = false }) 
         setSuccess("");
         onClose();
       }}
-      title={hasProfile ? "Edit Profile" : (isPersonaOnly ? "Create Persona" : "Create Profile")}
+      title={hasProfile ? "Edit Profile" : (currentStep === 0 ? "Create Profile" : "Create Persona")}
     >
       <div className={styles.profileContainer}>
         {/* {!isPersonaOnly && (
@@ -580,7 +583,7 @@ export function CreateProfileModal({ visible, onClose, isPersonaOnly = false }) 
             )}
             {!isPersonaOnly && currentStep < 1 ? (
               <Space size="large" style={{ width: '100%', justifyContent: 'space-between' }}>
-                <Button 
+                {/* <Button 
                   type="primary" 
                   onClick={handleNext} 
                   htmlType="button"
@@ -589,9 +592,10 @@ export function CreateProfileModal({ visible, onClose, isPersonaOnly = false }) 
                     width: "48%",
                   }}
                 >
-                  Proceed to create Persona
-                </Button>
+                  Register
+                </Button> */}
                 <Button 
+                  type="primary"
                   onClick={async (e) => {
                     e.preventDefault(); // Prevent any form submission
                     e.stopPropagation(); // Stop event propagation
@@ -630,20 +634,28 @@ export function CreateProfileModal({ visible, onClose, isPersonaOnly = false }) 
                       }
 
                       setSuccess("Business details saved successfully!");
-                      setTimeout(() => {
-                        form.resetFields();
-                        onClose();
-                      }, 1500);
+                      
+                      // Store the business details for later use
+                      setUserDetails(businessDetails);
+                      
+                      // Move to the next step (Persona Details)
+                      setCurrentStep(1);
                     } catch (err) {
                       setError(err.message);
                     }
                   }}
                   htmlType="button"
                   style={{
-                    width: "48%",
+                    width: "100%",
+                    backgroundColor: "#1890ff",
+                    borderColor: "#1890ff",
+                    color: "#fff",
+                    fontWeight: "500",
+                    height: "40px",
+                    fontSize: "16px"
                   }}
                 >
-                  Skip {'>>'}
+                  Register and proceed
                 </Button>
               </Space>
             ) : (

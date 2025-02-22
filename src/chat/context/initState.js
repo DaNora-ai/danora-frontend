@@ -8,7 +8,7 @@ export const initState = {
       ct: "2023-12-12",
       messages: [
         {
-          content: "Hello, I'm ChatGPT! Ask me anything!",
+          content: "Hello, we are Danora! Ask us anything!",
           sentTime: "1682827639323",
           role: "user",
           id: 123,
