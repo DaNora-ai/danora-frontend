@@ -23,6 +23,7 @@ export function CreateProfileModal({ visible, onClose, isPersonaOnly = false }) 
   const [hasProfile, setHasProfile] = useState(false);
   const [currentStep, setCurrentStep] = useState(isPersonaOnly ? 1 : 0);
   const [userDetails, setUserDetails] = useState(null);
+  const [isGenerating, setIsGenerating] = useState(false);
 
   useEffect(() => {
     if (visible) {
@@ -71,6 +72,7 @@ export function CreateProfileModal({ visible, onClose, isPersonaOnly = false }) 
   const handleGenerateChat = async (e) => {
     e.preventDefault(); // Prevent form submission
     try {
+      setIsGenerating(true);
       // Get all form values
       const values = form.getFieldsValue();
       
@@ -140,6 +142,8 @@ export function CreateProfileModal({ visible, onClose, isPersonaOnly = false }) 
     } catch (error) {
       console.error("Error generating prompt:", error);
       setError("Failed to generate prompt");
+    } finally {
+      setIsGenerating(false);
     }
   };
 
@@ -511,16 +515,15 @@ export function CreateProfileModal({ visible, onClose, isPersonaOnly = false }) 
       <Form.Item
         name="persona_prompt"
         label={
-          
             <Button
               type="primary"
               size="small"
               onClick={handleGenerateChat}
-              htmlType="button" // Explicitly set button type to prevent form submission
+              loading={isGenerating}
+              htmlType="button"
             >
-              Generate Persona Description
+              {isGenerating ? 'Generating...' : 'Generate Persona Description'}
             </Button>
-          
         }
       >
         <TextArea
