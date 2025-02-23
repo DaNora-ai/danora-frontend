@@ -5,6 +5,8 @@ import styles from './style/sider.module'
 import { classnames } from '../components/utils'
 import { useOptions } from './hooks'
 import { Tooltip } from 'antd'
+import  danoralogo  from '../assets/images/danoralogo.png'
+
 
 export function ChatSideBar() {
   const { is, setState, options } = useGlobal()
@@ -13,7 +15,7 @@ export function ChatSideBar() {
     <div className={classnames(styles.sider, 'flex-c-sb flex-column')}>
     {/* <Avatar/> */}
       <img 
-        src="https://danora.ai/wp-content/uploads/2023/09/Danora-Logo-Blue-_-White-BG-removebg-preview.png"
+        src={danoralogo}
         alt="Danora Logo"
         style={{
           width: '40px',

@@ -168,7 +168,7 @@ export function MessageHeader() {
                 Admin Panel
               </Button>
             )}
-            <Button type="text" onClick={handleLogout}>
+            <Button type="large" style={{ fontWeight: "bold" }} onClick={handleLogout}>
               Logout
             </Button>
           </div>
@@ -467,49 +467,42 @@ export function MessageBar() {
             <div className="flex-c">
               <span>Thinking</span> <Loading />
             </div>
-            <Button
+            {/* <Button
               size="min"
               className={styles.stop}
               onClick={stopResonse}
               icon="stop"
             >
               Stop Response
-            </Button>
+            </Button> */}
           </div>
         </div>
       )}
-      <div className={styles.bar_inner}>
-        <div className={styles.bar_type}>
+      <div className={styles.bar_inner} style={{ marginLeft: '40px', marginRight: '40px' }}>
+        <div className={styles.bar_type} style={{ marginLeft: '20px', marginRight: '20px' }}>
           <Textarea
             transparent={true}
-            rows="3"
+            rows="1"
             value={typeingMessage?.content || ""}
             onFocus={() => setIs({ inputing: true })}
             onBlur={() => setIs({ inputing: false })}
-            placeholder="Enter something...."
+            placeholder="Ask me anything..."
             onChange={(value) => setMessage(value)}
             onKeyDown={(e) => {
               if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault(); // Prevent default to avoid new line
+                e.preventDefault();
                 handleSendMessage();
               }
             }}
           />
         </div>
-        <div className={styles.bar_icon}>
-          {typeingMessage?.content && (
-            <Tooltip text="clear">
-              <Icon
-                className={styles.icon}
-                type="cancel"
-                onClick={clearTypeing}
-              />
-            </Tooltip>
-          )}
-          {/* <Tooltip text="history">
-            <Icon className={styles.icon} type="history" />
-          </Tooltip> */}
-          <Icon className={styles.icon} type="send" onClick={handleSendMessage} />
+        <div className={styles.bar_actions}>
+          <Button
+            type="primary"
+            onClick={handleSendMessage}
+            className={styles.send_button}
+            icon="send"
+          />
         </div>
       </div>
     </div>

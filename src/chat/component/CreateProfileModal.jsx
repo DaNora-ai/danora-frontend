@@ -439,7 +439,7 @@ export function CreateProfileModal({ visible, onClose, isPersonaOnly = false }) 
         </Select>
       </Form.Item>
 
-      <Form.Item name="purchase_frequency" label="Purchase Frequency">
+      {/* <Form.Item name="purchase_frequency" label="Purchase Frequency">
         <Select placeholder="Select purchase frequency">
           <Select.Option value="rarely">Rarely (Once a year)</Select.Option>
           <Select.Option value="occasionally">
@@ -447,7 +447,7 @@ export function CreateProfileModal({ visible, onClose, isPersonaOnly = false }) 
           </Select.Option>
           <Select.Option value="frequently">Frequently (Monthly)</Select.Option>
         </Select>
-      </Form.Item>
+      </Form.Item> */}
 
       <Form.Item
         name="loyalty_program_participation"
@@ -561,6 +561,7 @@ export function CreateProfileModal({ visible, onClose, isPersonaOnly = false }) 
             {isGenerating ? "Generating..." : "Generate Persona Description"}
           </Button>
         }
+        rules={[{ required: true, message: 'Please generate or enter a persona description' }]}
       >
         <TextArea
           rows={4}
@@ -578,7 +579,14 @@ export function CreateProfileModal({ visible, onClose, isPersonaOnly = false }) 
         setSuccess("");
         onClose();
       }}
-      title={hasProfile ? "Edit Profile" : (currentStep === 0 ? "Create Profile" : "Create Persona")}
+      title={
+        <span style={{ 
+          fontSize: "20px", 
+          fontWeight: "600" 
+        }}>
+          {hasProfile ? "Edit Profile" : (currentStep === 0 ? "Create Profile" : "Create Persona")}
+        </span>
+      }
       draggable={false}
     >
       <div className={styles.profileContainer}>
@@ -631,8 +639,8 @@ export function CreateProfileModal({ visible, onClose, isPersonaOnly = false }) 
                 <Button 
                   type="primary"
                   onClick={async (e) => {
-                    e.preventDefault(); // Prevent any form submission
-                    e.stopPropagation(); // Stop event propagation
+                    e.preventDefault();
+                    e.stopPropagation();
                     
                     try {
                       const values = await form.validateFields(['job_title', 'company_size', 'company_url', 'company_bio']);
@@ -691,15 +699,14 @@ export function CreateProfileModal({ visible, onClose, isPersonaOnly = false }) 
                       setError(err.message);
                     }
                   }}
-                  htmlType="button"
+                  size="large"
+                  block
                   style={{
-                    width: "100%",
-                    backgroundColor: "#1890ff",
-                    borderColor: "#1890ff",
-                    color: "#fff",
-                    fontWeight: "500",
                     height: "40px",
-                    fontSize: "16px"
+                    fontSize: "16px",
+                    fontWeight: "500",
+                    borderRadius: "6px",
+                    boxShadow: "0 2px 0 rgba(0, 0, 0, 0.045)"
                   }}
                 >
                   Register and proceed
@@ -709,12 +716,14 @@ export function CreateProfileModal({ visible, onClose, isPersonaOnly = false }) 
               <Button
                 type="primary"
                 htmlType="submit"
-                className={styles.createProfileButton}
+                size="large"
+                block
                 style={{
-                  backgroundColor: "#1890ff",
-                  width: "100%",
                   height: "40px",
-                  // marginTop: "16px",
+                  fontSize: "16px",
+                  fontWeight: "500",
+                  borderRadius: "6px",
+                  boxShadow: "0 2px 0 rgba(0, 0, 0, 0.045)",
                   marginBottom: "68px"
                 }}
               >
