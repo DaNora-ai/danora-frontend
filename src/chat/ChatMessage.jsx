@@ -224,7 +224,20 @@ export function EditorMessage() {
 
 export function MessageItem(props) {
   const { content, sentTime, role, suggestions } = props;
-  const { removeMessage, setMessage } = useGlobal();
+  const { removeMessage, setMessage, typeingMessage, clearTypeing } = useGlobal();
+
+  const handleSuggestionClick = (suggestion) => {
+    // Format the suggestion text before displaying it as a button
+    const displayText = suggestion
+      .replace(/\n/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+
+    // When clicked, set this formatted text as the new message
+    clearTypeing();
+    setMessage(displayText);
+  };
+
   return (
     <div className={classnames(styles.item, styles[role])}>
       {role === "user" ? (
@@ -267,20 +280,25 @@ export function MessageItem(props) {
             </div>
           </div>
           <MessageRender>{content}</MessageRender>
-          {role === 'assistant' && suggestions && suggestions.length > 0 && (
+          {suggestions && suggestions.length > 0 && (
             <div className={styles.suggestions}>
-              {suggestions.map((suggestion, index) => (
-                <Button
-                  key={index}
-                  type="text"
-                  className={styles.suggestion_button}
-                  onClick={() => {
-                    setMessage(suggestion);
-                  }}
-                >
-                  {suggestion}
-                </Button>
-              ))}
+              {suggestions.map((suggestion, index) => {
+                // Format the suggestion text for display
+                const displayText = suggestion
+                  .replace(/\n/g, ' ')
+                  .replace(/\s+/g, ' ')
+                  .trim();
+                
+                return (
+                  <button
+                    key={index}
+                    className={styles.suggestion_button}
+                    onClick={() => handleSuggestionClick(displayText)}
+                  >
+                    {displayText}
+                  </button>
+                );
+              })}
             </div>
           )}
         </div>
@@ -482,7 +500,7 @@ export function MessageBar() {
         <div className={styles.bar_type}>
           <Textarea
             transparent={true}
-            rows="3"
+            rows="1"
             value={typeingMessage?.content || ""}
             onFocus={() => setIs({ inputing: true })}
             onBlur={() => setIs({ inputing: false })}
@@ -490,26 +508,25 @@ export function MessageBar() {
             onChange={(value) => setMessage(value)}
             onKeyDown={(e) => {
               if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault(); // Prevent default to avoid new line
+                e.preventDefault();
                 handleSendMessage();
               }
             }}
           />
-        </div>
-        <div className={styles.bar_icon}>
-          {typeingMessage?.content && (
-            <Tooltip text="clear">
-              <Icon
-                className={styles.icon}
-                type="cancel"
-                onClick={clearTypeing}
-              />
-            </Tooltip>
-          )}
-          {/* <Tooltip text="history">
-            <Icon className={styles.icon} type="history" />
-          </Tooltip> */}
-          <Icon className={styles.icon} type="send" onClick={handleSendMessage} />
+          <div className={styles.bar_actions}>
+            {/* <Button
+              type="text"
+              className={styles.action_button}
+              icon={<Icon type="plus" />}
+            /> */}
+            <Button
+              type="primary"
+              className={styles.send_button}
+              onClick={handleSendMessage}
+            >
+              <Icon type="send" />
+            </Button>
+          </div>
         </div>
       </div>
     </div>
