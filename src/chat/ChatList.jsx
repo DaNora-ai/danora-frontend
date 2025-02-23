@@ -6,11 +6,15 @@ import styles from './style/list.module'
 
 export function ListEmpty() {
   return (
-    <div className={classnames('flex-column')}>
-      <Icon type="message" />
-      <Title type="h3">No conversations found<br />Start a new conversation to begin storing them locally.</Title>
+    <div className={classnames("flex-column")} style={{ textAlign: "center", backgroundColor: "lightgray" }}>
+      {/* <Icon type="message" /> */}
+      <Title type="h3" style={{ textAlign: "center" }}>
+        No conversations found
+        <br />
+        Start a new conversation to begin storing them locally.
+      </Title>
     </div>
-  )
+  );
 }
 
 export function ListTool(props) {
@@ -120,8 +124,14 @@ export function ChatList() {
   const { chat } = useGlobal()
   return (
     <div className={styles.list}>
-      {chat.length ? chat.map((item, index) => <ChatItem key={index} index={index} {...item} />) : <ListEmpty />}
       <CreateNew />
+      {chat.length ? (
+        chat.map((item, index) => (
+          <ChatItem key={index} index={index} {...item} />
+        ))
+      ) : (
+        <ListEmpty />
+      )}
     </div>
-  )
+  );
 }

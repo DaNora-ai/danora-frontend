@@ -6,7 +6,7 @@ import { Button } from "../Button";
 import styles from './modal.module.less'
 
 export const Modal = (props) => {
-  const { visible, onClose, children, title, footer, className } = props
+  const { visible, onClose, children, title, footer, className, draggable = true } = props
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const [size, setSize] = useState({ width: 500, height: 300 });
 
@@ -39,43 +39,53 @@ export const Modal = (props) => {
     setHidden(false)
     onClose && onClose()
   }
+
+  const modalContent = (
+    <div className={classnames(styles.modal, className)}>
+      <div className={styles.header}>
+        <div className={styles.title}>{title}</div>
+        <Button type="icon" icon="close" onClick={handleClose} />
+      </div>
+      <div
+        className={styles.container}
+        style={{
+          width: size.width,
+          height: size.height,
+          top: position.y,
+          left: position.x
+        }}
+      >
+        {children}
+      </div>
+      <div className={styles.footer}>
+        <div>
+          {
+            footer && <React.Fragment>
+              {/* <Button>取消</Button>
+              <Button>确定</Button> */}
+            </React.Fragment>
+          }
+        </div>
+      </div>
+    </div>
+  );
+
   const container = (
     <div className={styles.overlay}>
-      <Draggable x={x} y={y} onDrag={handleDrag}>
-        <div className={classnames(styles.modal, className)}>
-          <div className={styles.header}>
-            <div className={styles.title}>{title}</div>
-            <Button type="icon" icon="close" onClick={handleClose} />
-          </div>
-          <div
-            className={styles.container}
-            style={{
-              width: size.width,
-              height: size.height,
-              top: position.y,
-              left: position.x
-            }}
-          >
-            {children}
-          </div>
-          <div className={styles.footer}>
-            <div>
-              {
-                footer && <React.Fragment>
-                  <Button>取消</Button>
-                  <Button>确定</Button>
-                </React.Fragment>
-              }
-            </div>
-          </div>
-        </div>
-      </Draggable >
-    </div >
+      {draggable ? (
+        <Draggable x={x} y={y} onDrag={handleDrag}>
+          {modalContent}
+        </Draggable>
+      ) : (
+        modalContent
+      )}
+    </div>
   );
+  
   return hidden ? ReactDOM.createPortal(container, document.body) : null;
 };
 
-
 Modal.defaultProps = {
   title: '',
+  draggable: true
 }

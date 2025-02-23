@@ -8,6 +8,7 @@ import {
   Button,
   Popover,
 } from "@/components";
+import { RobotOutlined, UserOutlined } from "@ant-design/icons";
 import { CopyIcon, ScrollView, Error, EmptyChat, ChatHelp } from "./component";
 import { MessageRender } from "./MessageRender";
 import { ConfigInfo } from "./ConfigInfo";
@@ -24,6 +25,7 @@ import { useAuth } from "./context/AuthContext";
 import { signOut } from "firebase/auth";
 import { auth } from "./context/firebase.js";
 import { sendChatMessage } from './service/chat';
+import { notification, Tooltip as AntdTooltip } from "antd";
 // import { insertToMongoDB } from './service/mongodb';
  
 export function MessageHeader() {
@@ -38,6 +40,13 @@ export function MessageHeader() {
   const [adminPanelVisible, setAdminPanelVisible] = useState(false);
   const [createProfileModalVisible, setCreateProfileModalVisible] = useState(false);
   const [hasProfile, setHasProfile] = useState(false);
+
+  // Add new useEffect to show auth modal on page load
+  useEffect(() => {
+    if (!currentUser) {
+      setAuthModalVisible(true);
+    }
+  }, []); // Empty dependency array means this runs once on mount
 
   const checkUserProfile = async () => {
     if (currentUser) {
@@ -72,8 +81,19 @@ export function MessageHeader() {
   const handleLogout = async () => {
     try {
       await signOut(auth);
+      notification.success({
+        message: "Success",
+        description: "User logged out successfully",
+        placement: "topRight",
+      });
+      setAuthModalVisible(true); // Show auth modal after successful logout
     } catch (error) {
       console.error("Error signing out:", error);
+      notification.error({
+        message: "Error",
+        description: "Failed to log out. Please try again.",
+        placement: "topRight",
+      });
     }
   };
 
@@ -120,18 +140,17 @@ export function MessageHeader() {
         <div className={styles.length}>{messages.length} messages</div>
       </div>
       <div className={styles.header_bar}>
-
         {currentUser && (
-          <div style={{ marginRight: '10px' }}>
-          {!hasProfile && (
-            <Button
-              type="primary"
-              onClick={() => setCreateProfileModalVisible(true)}
-              className={styles.createProfileButton}
-            >
-              Create Profile
-            </Button>
-          )}
+          <div style={{ marginRight: "10px" }}>
+            {!hasProfile && (
+              <Button
+                type="primary"
+                onClick={() => setCreateProfileModalVisible(true)}
+                className={styles.createProfileButton}
+              >
+                Create Profile
+              </Button>
+            )}
           </div>
         )}
         {currentUser ? (
@@ -155,11 +174,11 @@ export function MessageHeader() {
           </div>
         ) : (
           <Button type="primary" onClick={handleLoginClick}>
-            Login
+            Register into Danora
           </Button>
         )}
 
-        <Icon
+        {/* <Icon
           className={styles.icon}
           type={options.general.theme}
           onClick={() =>
@@ -167,14 +186,16 @@ export function MessageHeader() {
               theme: options.general.theme === "light" ? "dark" : "light",
             })
           }
-        />
-        <Icon className={styles.icon} type="clear" onClick={clearMessage} />
-        <Icon
+        /> */}
+        <AntdTooltip title="Clear Chat" placement="bottom">
+          <Icon className={styles.icon} type="clear" onClick={clearMessage} />
+        </AntdTooltip>
+        {/* <Icon
           className={styles.icon}
           type="more"
           onClick={handleAdminPanelClick}
-        />
-        <Icon type="download" className={styles.icon} />
+        /> */}
+        {/* <Icon type="download" className={styles.icon} /> */}
       </div>
       <AuthModal
         visible={authModalVisible}
@@ -206,15 +227,39 @@ export function MessageItem(props) {
   const { removeMessage, setMessage } = useGlobal();
   return (
     <div className={classnames(styles.item, styles[role])}>
-      <Avatar src={role !== "user" && avatar} />
+      {role === "user" ? (
+        <div style={{ 
+          width: '40px',
+          height: '40px',
+          backgroundColor: '#1890ff',
+          borderRadius: '50%',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center'
+        }}>
+          <UserOutlined style={{ fontSize: '20px', color: 'white' }} />
+        </div>
+      ) : (
+        <div style={{ 
+          width: '40px',
+          height: '40px',
+          backgroundColor: '#52c41a',
+          borderRadius: '50%',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center'
+        }}>
+          <RobotOutlined style={{ fontSize: '20px', color: 'white' }} />
+        </div>
+      )}
       <div className={classnames(styles.item_content, styles[`item_${role}`])}>
         <div className={styles.item_inner}>
           <div className={styles.item_tool}>
             <div className={styles.item_bar}>
               {role === "user" ? (
                 <React.Fragment>
-                  <Icon className={styles.icon} type="reload" />
-                  <Icon className={styles.icon} type="editor" />
+                  {/* <Icon className={styles.icon} type="reload" /> */}
+                  {/* <Icon className={styles.icon} type="editor" /> */}
                 </React.Fragment>
               ) : (
                 <CopyIcon value={content} />
@@ -264,6 +309,15 @@ export function MessageBar() {
   const { currentUser } = useAuth();
 
   const handleSendMessage = async () => {
+    if (!currentUser) {
+      notification.warning({
+        message: "Authentication Required",
+        description: "Please login to chat with personas.",
+        placement: "topRight"
+      });
+      return;
+    }
+
     console.log({typeingMessage});
     if (!typeingMessage?.content) return;
     

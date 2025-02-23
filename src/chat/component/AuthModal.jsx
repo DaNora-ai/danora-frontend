@@ -167,6 +167,26 @@ export function AuthModal({ visible, onClose, onSignUpSuccess }) {
       onClose={onClose}
       title={isLogin ? "Login" : "Sign Up"}
     >
+      {/* Toggle Login/Signup */}
+      <div style={{...styles.toggle, marginTop: "10px"}}>
+        {isLogin ? (
+          <>
+            Don't have an account?
+            <span style={styles.toggleLink} onClick={() => setIsLogin(false)}>
+              Sign Up
+            </span>
+          </>
+        ) : (
+          <>
+            Already have an account?
+            <span style={styles.toggleLink} onClick={() => setIsLogin(true)}>
+              Login
+            </span>
+          </>
+        )}
+      </div>
+
+
       <div style={styles.container}>
         {/* Google Sign-In Button */}
         <button style={styles.buttonGoogle} onClick={handleGoogleSignIn}>
@@ -211,8 +231,7 @@ export function AuthModal({ visible, onClose, onSignUpSuccess }) {
           {isLogin ? "Login" : "Sign Up"}
         </button>
 
-
-        {/* Toggle Login/Signup */}
+        {/* Toggle Login/Signup
         <div style={styles.toggle}>
           {isLogin ? (
             <>
@@ -229,7 +248,7 @@ export function AuthModal({ visible, onClose, onSignUpSuccess }) {
               </span>
             </>
           )}
-        </div>
+        </div> */}
       </div>
     </Modal>
   );

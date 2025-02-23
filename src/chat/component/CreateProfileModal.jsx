@@ -9,10 +9,12 @@ import {
   Upload,
   Steps,
   Space,
+  notification,
 } from "antd";
 import { UploadOutlined } from "@ant-design/icons";
 import { auth } from "../context/firebase";
 import styles from "./CreateProfileModal.module.less";
+import { useGlobal } from "../context";
 
 const { TextArea } = Input;
 
@@ -24,6 +26,7 @@ export function CreateProfileModal({ visible, onClose, isPersonaOnly = false }) 
   const [currentStep, setCurrentStep] = useState(isPersonaOnly ? 1 : 0);
   const [userDetails, setUserDetails] = useState(null);
   const [isGenerating, setIsGenerating] = useState(false);
+  const { newChat } = useGlobal();
 
   useEffect(() => {
     if (visible) {
@@ -197,16 +200,46 @@ export function CreateProfileModal({ visible, onClose, isPersonaOnly = false }) 
       const data = await response.json();
       console.log("Profile saved to MongoDB:", data);
 
+      // Show success notification
+      notification.success({
+        message: "Success",
+        description: "Persona created successfully!",
+        placement: "topRight",
+      });
+
       setSuccess("Profile created successfully!");
 
-      window.location.reload();
+      // Create a new chat with the newly created persona
+      const newPersona = {
+        title: values.persona_name,
+        desc: values.persona_bio,
+        role: "system",
+        persona_type: values.persona_type,
+        id: values.persona_type === "general" ? 1 :
+            values.persona_type === "fashion" ? 2 :
+            values.persona_type === "luxury" ? 3 :
+            values.persona_type === "food" ? 4 :
+            values.persona_type === "technology" ? 5 : 1
+      };
+      
+      // Start a new chat with this persona
+      newChat(newPersona);
 
       setTimeout(() => {
         form.resetFields();
         setUserDetails(null);
         onClose();
       }, 1500);
+
+      // Reload the page to update the personas list
+      window.location.reload();
     } catch (err) {
+      // Show error notification
+      notification.error({
+        message: "Error",
+        description: err.message || "Failed to create persona",
+        placement: "topRight",
+      });
       setError(err.message);
     }
   };
@@ -546,6 +579,7 @@ export function CreateProfileModal({ visible, onClose, isPersonaOnly = false }) 
         onClose();
       }}
       title={hasProfile ? "Edit Profile" : (currentStep === 0 ? "Create Profile" : "Create Persona")}
+      draggable={false}
     >
       <div className={styles.profileContainer}>
         {/* {!isPersonaOnly && (
@@ -633,6 +667,13 @@ export function CreateProfileModal({ visible, onClose, isPersonaOnly = false }) 
                         throw new Error(errorData.error || "Failed to save business details");
                       }
 
+                      // Show success notification
+                      notification.success({
+                        message: "Success",
+                        description: "Business details saved successfully!",
+                        placement: "topRight",
+                      });
+                      
                       setSuccess("Business details saved successfully!");
                       
                       // Store the business details for later use
@@ -641,6 +682,12 @@ export function CreateProfileModal({ visible, onClose, isPersonaOnly = false }) 
                       // Move to the next step (Persona Details)
                       setCurrentStep(1);
                     } catch (err) {
+                      // Show error notification
+                      notification.error({
+                        message: "Error",
+                        description: err.message || "Failed to save business details",
+                        placement: "topRight",
+                      });
                       setError(err.message);
                     }
                   }}
@@ -677,7 +724,7 @@ export function CreateProfileModal({ visible, onClose, isPersonaOnly = false }) 
           </Form.Item>
         </Form>
         {error && <div className={styles.error}>{error}</div>}
-        {success && <div className={styles.success}>{success}</div>}
+        {/* {success && <div className={styles.success}>{success}</div>} */}
       </div>
     </Modal>
   );

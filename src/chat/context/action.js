@@ -83,7 +83,10 @@ export default function action(state, dispatch) {
           messages: [],
           ct: Date.now(),
           icon: [2, "files"],
-          persona: persona || null,
+          persona: {
+            ...persona,
+            type: persona?.persona_type || "general"
+          },
         },
       ];
       setState({ chat: chatList, currentChat: chatList.length - 1 });
