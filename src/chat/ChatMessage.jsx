@@ -52,7 +52,7 @@ export function MessageHeader() {
   const checkUserProfile = async () => {
     if (currentUser) {
       try {
-        const response = await fetch(`http://34.68.23.90:3001/api/profiles/check/${currentUser.uid}`);
+        const response = await fetch(`http://34.44.230.187:3001/api/profiles/check/${currentUser.uid}`);
         const data = await response.json();
         setHasProfile(data.exists);
       } catch (error) {
@@ -107,7 +107,7 @@ export function MessageHeader() {
 
     const handleInsert = async () => {
       try {
-        const response = await fetch("http://34.68.23.90:3001/api/insert", {
+        const response = await fetch("http://34.44.230.187:3001/api/insert", {
           method: "POST",
           headers: { 
             "Content-Type": "application/json" 
@@ -407,7 +407,7 @@ export function MessageBar() {
               // Now store both messages in MongoDB
               try {
                 // Store user message
-                const userResponse = await fetch("http://34.68.23.90:3001/api/chats/store", {
+                const userResponse = await fetch("http://34.44.230.187:3001/api/chats/store", {
                   method: "POST",
                   headers: {
                     "Content-Type": "application/json"
@@ -426,7 +426,7 @@ export function MessageBar() {
                 console.log('User message stored successfully');
 
                 // Store complete assistant message
-                const assistantResponse = await fetch("http://34.68.23.90:3001/api/chats/store", {
+                const assistantResponse = await fetch("http://34.44.230.187:3001/api/chats/store", {
                   method: "POST",
                   headers: {
                     "Content-Type": "application/json"

@@ -1,11 +1,11 @@
 import { MongoClient } from 'mongodb';
 
-const uri = "mongodb://danora:danora@34.68.23.90:27017/";
+const uri = "mongodb://danora:danora@34.44.230.187:27017/";
 const client = new MongoClient(uri);
 
 export const insertToMongoDB = async () => {
     try {
-        const response = await fetch('http://34.68.23.90:3001/api/insert', {
+        const response = await fetch('http://34.44.230.187:3001/api/insert', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
