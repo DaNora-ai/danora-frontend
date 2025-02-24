@@ -26,6 +26,7 @@ import { signOut } from "firebase/auth";
 import { auth } from "./context/firebase.js";
 import { sendChatMessage } from './service/chat';
 import { notification, Tooltip as AntdTooltip } from "antd";
+import { Button as AntButton } from 'antd';
 // import { insertToMongoDB } from './service/mongodb';
  
 export function MessageHeader() {
@@ -168,9 +169,13 @@ export function MessageHeader() {
                 Admin Panel
               </Button>
             )}
-            <Button type="large" style={{ fontWeight: "bold" }} onClick={handleLogout}>
+            <AntButton 
+              // type="dashed"
+              danger
+              onClick={handleLogout}
+            >
               Logout
-            </Button>
+            </AntButton>
           </div>
         ) : (
           <Button type="primary" onClick={handleLoginClick}>

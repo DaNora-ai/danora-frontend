@@ -100,6 +100,7 @@ export function CreateProfileModal({ visible, onClose, isPersonaOnly = false }) 
         industry: userDetails?.industry || "",
 
         // Persona Details
+        company_url: values.company_url || "",
         persona_name: values.persona_name || "",
         persona_role: values.persona_role || "",
         persona_traits: values.persona_traits || "",
@@ -248,16 +249,33 @@ export function CreateProfileModal({ visible, onClose, isPersonaOnly = false }) 
     <>
       {/* Professional Information */}
       <Divider orientation="left">Professional Information</Divider>
-      <Form.Item name="job_title" label="Job Title">
+      <Form.Item
+        name="job_title"
+        label="Job Title"
+        rules={[
+          {
+            required: true,
+            message: "Please enter preferred products/services",
+          },
+        ]}
+      >
         <Select placeholder="Select job title">
           <Select.Option value="founder_ceo">Founder/CEO</Select.Option>
           <Select.Option value="cmo">CMO</Select.Option>
           <Select.Option value="vp_marketing">VP Marketing</Select.Option>
           <Select.Option value="marketing_ops">Marketing Ops</Select.Option>
-          <Select.Option value="product_marketing">Product Marketing</Select.Option>
-          <Select.Option value="social_media_manager">Social Media Manager</Select.Option>
-          <Select.Option value="demand_gen">Demand Gen/Acquisition</Select.Option>
-          <Select.Option value="content_marketing">Content Marketing</Select.Option>
+          <Select.Option value="product_marketing">
+            Product Marketing
+          </Select.Option>
+          <Select.Option value="social_media_manager">
+            Social Media Manager
+          </Select.Option>
+          <Select.Option value="demand_gen">
+            Demand Gen/Acquisition
+          </Select.Option>
+          <Select.Option value="content_marketing">
+            Content Marketing
+          </Select.Option>
           <Select.Option value="other">Other</Select.Option>
         </Select>
       </Form.Item>
@@ -278,7 +296,7 @@ export function CreateProfileModal({ visible, onClose, isPersonaOnly = false }) 
         </Select>
       </Form.Item>
 
-      <Form.Item 
+      {/* <Form.Item 
         name="company_url" 
         label="Company URL"
         rules={[
@@ -287,7 +305,7 @@ export function CreateProfileModal({ visible, onClose, isPersonaOnly = false }) 
         ]}
       >
         <Input placeholder="Enter company website URL" />
-      </Form.Item>
+      </Form.Item> */}
 
       <Form.Item
         name="company_bio"
@@ -298,11 +316,11 @@ export function CreateProfileModal({ visible, onClose, isPersonaOnly = false }) 
               if (!value) return Promise.resolve();
               const wordCount = value.trim().split(/\s+/).length;
               if (wordCount > 100) {
-                return Promise.reject('Bio cannot exceed 100 words');
+                return Promise.reject("Bio cannot exceed 100 words");
               }
               return Promise.resolve();
-            }
-          }
+            },
+          },
         ]}
       >
         <TextArea
@@ -346,7 +364,7 @@ export function CreateProfileModal({ visible, onClose, isPersonaOnly = false }) 
           },
         ]}
       >
-        <Input placeholder="Enter your name" />
+        <Input placeholder="Enter persona name" />
       </Form.Item>
 
       <Form.Item
@@ -396,6 +414,17 @@ export function CreateProfileModal({ visible, onClose, isPersonaOnly = false }) 
           rows={4}
           placeholder="e.g. I'm deeply invested in making the world a better place. I keep up with ethical brands, sustainability hacks, and grassroots activism."
         />
+      </Form.Item>
+
+      <Form.Item
+        name="company_url"
+        label="Company URL"
+        rules={[
+          { type: "url", message: "Please enter a valid URL" },
+          { required: true, message: "Please enter your company URL" },
+        ]}
+      >
+        <Input placeholder="Enter company website URL. Your persona will scrape this website." />
       </Form.Item>
 
       {/* <Form.Item name="persona_pronouns" label="Pronouns">
@@ -561,7 +590,12 @@ export function CreateProfileModal({ visible, onClose, isPersonaOnly = false }) 
             {isGenerating ? "Generating..." : "Generate Persona Description"}
           </Button>
         }
-        rules={[{ required: true, message: 'Please generate or enter a persona description' }]}
+        rules={[
+          {
+            required: true,
+            message: "Please generate or enter a persona description",
+          },
+        ]}
       >
         <TextArea
           rows={4}
@@ -706,7 +740,9 @@ export function CreateProfileModal({ visible, onClose, isPersonaOnly = false }) 
                     fontSize: "16px",
                     fontWeight: "500",
                     borderRadius: "6px",
-                    boxShadow: "0 2px 0 rgba(0, 0, 0, 0.045)"
+                    boxShadow: "0 2px 0 rgba(0, 0, 0, 0.045)",
+                    borderColor: "#1890ff",
+                    color: "white"
                   }}
                 >
                   Register and proceed
