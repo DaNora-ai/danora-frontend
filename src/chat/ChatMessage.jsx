@@ -499,6 +499,7 @@ export function MessageBar() {
                 handleSendMessage();
               }
             }}
+            className={styles.notoSansTextarea}
           />
         </div>
         <div className={styles.bar_actions}>

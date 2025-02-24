@@ -39,13 +39,13 @@ export function ChatSideBar() {
             onClick={() => setState({ is: { ...is, apps: false } })}
           />
         </Tooltip>
-        <Tooltip title={`Switch to ${options.general.theme === 'light' ? 'Dark' : 'Light'} Theme`} placement="right">
+        {/* <Tooltip title={`Switch to ${options.general.theme === 'light' ? 'Dark' : 'Light'} Theme`} placement="right">
           <Icon 
             className={styles.icon} 
             type={options.general.theme} 
             onClick={() => setGeneral({ theme: options.general.theme === 'light' ? 'dark' : 'light' })}
           />
-        </Tooltip>
+        </Tooltip> */}
         {/* <Icon 
           className={styles.icon} 
           type="config" 

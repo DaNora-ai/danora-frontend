@@ -139,7 +139,8 @@
   content: "\e907";
 }
 .ico-close:before {
-  content: "\e908";
+  /* content: "\e908"; */
+  /* cross icon modify */
 }
 .ico-column-close:before {
   content: "\e909";
