@@ -168,7 +168,7 @@ export function MessageHeader() {
                 Admin Panel
               </Button>
             )}
-            <Button type="text" onClick={handleLogout}>
+            <Button type="large" style={{ fontWeight: "bold" }} onClick={handleLogout}>
               Logout
             </Button>
           </div>
@@ -485,26 +485,26 @@ export function MessageBar() {
             <div className="flex-c">
               <span>Thinking</span> <Loading />
             </div>
-            <Button
+            {/* <Button
               size="min"
               className={styles.stop}
               onClick={stopResonse}
               icon="stop"
             >
               Stop Response
-            </Button>
+            </Button> */}
           </div>
         </div>
       )}
-      <div className={styles.bar_inner}>
-        <div className={styles.bar_type}>
+      <div className={styles.bar_inner} style={{ marginLeft: '40px', marginRight: '40px' }}>
+        <div className={styles.bar_type} style={{ marginLeft: '20px', marginRight: '20px' }}>
           <Textarea
             transparent={true}
             rows="1"
             value={typeingMessage?.content || ""}
             onFocus={() => setIs({ inputing: true })}
             onBlur={() => setIs({ inputing: false })}
-            placeholder="Enter something...."
+            placeholder="Ask me anything..."
             onChange={(value) => setMessage(value)}
             onKeyDown={(e) => {
               if (e.key === 'Enter' && !e.shiftKey) {
@@ -513,20 +513,14 @@ export function MessageBar() {
               }
             }}
           />
-          <div className={styles.bar_actions}>
-            {/* <Button
-              type="text"
-              className={styles.action_button}
-              icon={<Icon type="plus" />}
-            /> */}
-            <Button
-              type="primary"
-              className={styles.send_button}
-              onClick={handleSendMessage}
-            >
-              <Icon type="send" />
-            </Button>
-          </div>
+        </div>
+        <div className={styles.bar_actions}>
+          <Button
+            type="primary"
+            onClick={handleSendMessage}
+            className={styles.send_button}
+            icon="send"
+          />
         </div>
       </div>
     </div>
