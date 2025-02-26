@@ -24,11 +24,11 @@ import { CreateProfileModal } from "./component/CreateProfileModal";
 import { useAuth } from "./context/AuthContext";
 import { signOut } from "firebase/auth";
 import { auth } from "./context/firebase.js";
-import { sendChatMessage } from './service/chat';
+import { sendChatMessage } from "./service/chat";
 import { notification, Tooltip as AntdTooltip } from "antd";
-import { Button as AntButton } from 'antd';
+import { Button as AntButton } from "antd";
 // import { insertToMongoDB } from './service/mongodb';
- 
+
 export function MessageHeader() {
   const { is, setIs, clearMessage, options } = useGlobal();
   const { message } = useMesssage();
@@ -39,24 +39,27 @@ export function MessageHeader() {
   const { currentUser } = useAuth();
   const [authModalVisible, setAuthModalVisible] = useState(false);
   const [adminPanelVisible, setAdminPanelVisible] = useState(false);
-  const [createProfileModalVisible, setCreateProfileModalVisible] = useState(false);
+  const [createProfileModalVisible, setCreateProfileModalVisible] =
+    useState(false);
   const [hasProfile, setHasProfile] = useState(false);
 
-  // Add new useEffect to show auth modal on page load
+  // Show auth modal on page load if user is not logged in
   useEffect(() => {
     if (!currentUser) {
       setAuthModalVisible(true);
     }
-  }, []); // Empty dependency array means this runs once on mount
+  }, []);
 
   const checkUserProfile = async () => {
     if (currentUser) {
       try {
-        const response = await fetch(`http://34.44.230.187:3001/api/profiles/check/${currentUser.uid}`);
+        const response = await fetch(
+          `http://34.44.230.187:3001/api/profiles/check/${currentUser.uid}`
+        );
         const data = await response.json();
         setHasProfile(data.exists);
       } catch (error) {
-        console.error('Error checking profile:', error);
+        console.error("Error checking profile:", error);
         setHasProfile(false);
       }
     }
@@ -64,7 +67,7 @@ export function MessageHeader() {
 
   useEffect(() => {
     checkUserProfile();
-  }, [currentUser, createProfileModalVisible]); // Add createProfileModalVisible as dependency
+  }, [currentUser, createProfileModalVisible]);
 
   const handleLoginClick = () => {
     setAuthModalVisible(true);
@@ -76,7 +79,7 @@ export function MessageHeader() {
 
   const handleProfileModalClose = () => {
     setCreateProfileModalVisible(false);
-    checkUserProfile(); // Check profile status after modal closes
+    checkUserProfile();
   };
 
   const handleLogout = async () => {
@@ -87,7 +90,7 @@ export function MessageHeader() {
         description: "User logged out successfully",
         placement: "topRight",
       });
-      setAuthModalVisible(true); // Show auth modal after successful logout
+      setAuthModalVisible(true);
     } catch (error) {
       console.error("Error signing out:", error);
       notification.error({
@@ -98,35 +101,33 @@ export function MessageHeader() {
     }
   };
 
-  // Check if user is admin (you'll need to implement this based on your user roles system)
-  const isAdmin = currentUser?.email === "admin@example.com"; // Replace with your admin check logic
+  // Check if user is admin (replace with your admin check logic)
+  const isAdmin = currentUser?.email === "admin@example.com";
 
   const handleAdminPanelClick = () => {
     setAdminPanelVisible(true);
   };
 
-    const handleInsert = async () => {
-      try {
-        const response = await fetch("http://34.44.230.187:3001/api/insert", {
-          method: "POST",
-          headers: { 
-            "Content-Type": "application/json" 
-          },
-          body: JSON.stringify({
-            message: "Test message",
-            timestamp: new Date(),
-            userId: currentUser?.uid || "anonymous"
-          })
-        });
-        const data = await response.json();
-        if (!data.success) {
-          throw new Error(data.error);
-        }
-        console.log("Successfully inserted document:", data.result);
-      } catch (error) {
-        console.error("Failed to insert document:", error);
+  const handleInsert = async () => {
+    try {
+      const response = await fetch("http://34.44.230.187:3001/api/insert", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          message: "Test message",
+          timestamp: new Date(),
+          userId: currentUser?.uid || "anonymous",
+        }),
+      });
+      const data = await response.json();
+      if (!data.success) {
+        throw new Error(data.error);
       }
-    };
+      console.log("Successfully inserted document:", data.result);
+    } catch (error) {
+      console.error("Failed to insert document:", error);
+    }
+  };
 
   return (
     <div className={classnames(styles.header)}>
@@ -169,11 +170,7 @@ export function MessageHeader() {
                 Admin Panel
               </Button>
             )}
-            <AntButton 
-              // type="dashed"
-              danger
-              onClick={handleLogout}
-            >
+            <AntButton danger onClick={handleLogout}>
               Logout
             </AntButton>
           </div>
@@ -228,33 +225,37 @@ export function EditorMessage() {
 }
 
 export function MessageItem(props) {
-  const { content, sentTime, role, suggestions } = props;
-  const { removeMessage, setMessage } = useGlobal();
+  const { content, sentTime, role, suggestions, onSuggestionClick } = props;
+  const { setMessage } = useGlobal();
   return (
     <div className={classnames(styles.item, styles[role])}>
       {role === "user" ? (
-        <div style={{ 
-          width: '40px',
-          height: '40px',
-          backgroundColor: '#1890ff',
-          borderRadius: '50%',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center'
-        }}>
-          <UserOutlined style={{ fontSize: '20px', color: 'white' }} />
+        <div
+          style={{
+            width: "40px",
+            height: "40px",
+            backgroundColor: "#1890ff",
+            borderRadius: "50%",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <UserOutlined style={{ fontSize: "20px", color: "white" }} />
         </div>
       ) : (
-        <div style={{ 
-          width: '40px',
-          height: '40px',
-          backgroundColor: '#52c41a',
-          borderRadius: '50%',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center'
-        }}>
-          <RobotOutlined style={{ fontSize: '20px', color: 'white' }} />
+        <div
+          style={{
+            width: "40px",
+            height: "40px",
+            backgroundColor: "#52c41a",
+            borderRadius: "50%",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <RobotOutlined style={{ fontSize: "20px", color: "white" }} />
         </div>
       )}
       <div className={classnames(styles.item_content, styles[`item_${role}`])}>
@@ -262,17 +263,14 @@ export function MessageItem(props) {
           <div className={styles.item_tool}>
             <div className={styles.item_bar}>
               {role === "user" ? (
-                <React.Fragment>
-                  {/* <Icon className={styles.icon} type="reload" /> */}
-                  {/* <Icon className={styles.icon} type="editor" /> */}
-                </React.Fragment>
+                <React.Fragment>{/* User message actions */}</React.Fragment>
               ) : (
                 <CopyIcon value={content} />
               )}
             </div>
           </div>
           <MessageRender>{content}</MessageRender>
-          {role === 'assistant' && suggestions && suggestions.length > 0 && (
+          {role === "assistant" && suggestions && suggestions.length > 0 && (
             <div className={styles.suggestions}>
               {suggestions.map((suggestion, index) => (
                 <Button
@@ -280,7 +278,12 @@ export function MessageItem(props) {
                   type="text"
                   className={styles.suggestion_button}
                   onClick={() => {
+                    // Optionally update the textarea with the suggestion...
                     setMessage(suggestion);
+                    // Immediately send the suggestion as a message
+                    if (onSuggestionClick) {
+                      onSuggestionClick(suggestion);
+                    }
                   }}
                 >
                   {suggestion}
@@ -294,176 +297,10 @@ export function MessageItem(props) {
   );
 }
 
-export function MessageBar() {
-  const {
-    sendMessage,
-    setMessage,
-    is,
-    options,
-    setIs,
-    typeingMessage,
-    clearTypeing,
-    stopResonse,
-    setState,
-    chat,
-    currentChat
-  } = useGlobal();
-  const { message } = useMesssage();
-  const { messages = [] } = message || {};
-
-  const { currentUser } = useAuth();
-
-  const handleSendMessage = async () => {
-    if (!currentUser) {
-      notification.warning({
-        message: "Authentication Required",
-        description: "Please login to chat with personas.",
-        placement: "topRight"
-      });
-      return;
-    }
-
-    console.log({typeingMessage});
-    if (!typeingMessage?.content) return;
-    
-    try {
-      setIs({ thinking: true });
-      
-      // Create a new message object for the user's message
-      const userMessage = {
-        role: 'user',
-        content: typeingMessage.content,
-        sentTime: new Date().toISOString(),
-        id: Date.now(),
-        uid: currentUser?.uid || 'anonymous',
-        userEmail: currentUser?.email || 'anonymous',
-        persona: chat[currentChat]?.persona || null
-      };
-      
-      // Create assistant message object
-      const assistantMessage = {
-        role: 'assistant',
-        content: 'Thinking...',
-        sentTime: new Date().toISOString(),
-        id: Date.now() + 1,
-        uid: currentUser?.uid || 'anonymous',
-        userEmail: currentUser?.email || 'anonymous',
-        persona: chat[currentChat]?.persona || null
-      };
-
-      // Update chat with both messages immediately
-      const updatedMessages = [...messages, userMessage, assistantMessage];
-      const updatedChat = [...chat];
-      updatedChat[currentChat] = {
-        ...chat[currentChat],
-        messages: updatedMessages
-      };
-      
-      setState({ chat: updatedChat });
-      clearTypeing();
-
-      const contextMessages = messages.map(msg => ({
-        role: msg.role,
-        content: msg.content
-      }));
-      
-      contextMessages.push({
-        role: userMessage.role,
-        content: userMessage.content
-      });
-      
-      let finalResponse = ''; // Store the complete response
-
-      try {
-        await sendChatMessage(
-          typeingMessage.content,
-          contextMessages,
-          async (response, suggestions) => {
-            if (response) {
-              finalResponse = response; // Keep track of the complete response
-
-              // Remove suggestions from the response content if they appear there
-              const cleanResponse = response.replace(/What kind of pasta.*$/, '').trim();
-
-              // Update UI with streaming response
-              const finalAssistantMessage = {
-                ...assistantMessage,
-                content: cleanResponse,
-                suggestions: suggestions || [] // Add suggestions to the message
-              };
-
-              const latestMessages = [...messages, userMessage, finalAssistantMessage];
-              const newChat = [...chat];
-              newChat[currentChat] = {
-                ...chat[currentChat],
-                messages: latestMessages
-              };
-              
-              setState({ chat: newChat });
-            }
-
-            // If suggestions are present, it means the streaming is complete
-            if (suggestions) {
-              // Now store both messages in MongoDB
-              try {
-                // Store user message
-                const userResponse = await fetch("http://34.44.230.187:3001/api/chats/store", {
-                  method: "POST",
-                  headers: {
-                    "Content-Type": "application/json"
-                  },
-                  body: JSON.stringify({
-                    ...userMessage,
-                    conversationId: currentChat,
-                    timestamp: new Date().toISOString()
-                  })
-                });
-                
-                if (!userResponse.ok) {
-                  throw new Error('Failed to store user message');
-                }
-                
-                console.log('User message stored successfully');
-
-                // Store complete assistant message
-                const assistantResponse = await fetch("http://34.44.230.187:3001/api/chats/store", {
-                  method: "POST",
-                  headers: {
-                    "Content-Type": "application/json"
-                  },
-                  body: JSON.stringify({
-                    ...assistantMessage,
-                    content: finalResponse, // Use the complete response
-                    conversationId: currentChat,
-                    timestamp: new Date().toISOString()
-                  })
-                });
-                
-                if (!assistantResponse.ok) {
-                  throw new Error('Failed to store assistant message');
-                }
-                
-                console.log('Assistant message stored successfully');
-              } catch (error) {
-                console.error("Failed to store messages:", error);
-              }
-            }
-          },
-          chat[currentChat]?.persona
-        );
-      } catch (error) {
-        console.error('Chat error:', error);
-      }
-      
-    } catch (error) {
-      console.error('Failed to send message:', error);
-    } finally {
-      setIs({ thinking: false });
-    }
-  };
-
+export function MessageBar({ handleSendMessage }) {
+  const { is, options, setIs, typeingMessage, setMessage } = useGlobal();
   useSendKey(handleSendMessage, options.general.command);
-  
+
   return (
     <div className={styles.bar}>
       {is.thinking && (
@@ -472,19 +309,17 @@ export function MessageBar() {
             <div className="flex-c">
               <span>Thinking</span> <Loading />
             </div>
-            {/* <Button
-              size="min"
-              className={styles.stop}
-              onClick={stopResonse}
-              icon="stop"
-            >
-              Stop Response
-            </Button> */}
           </div>
         </div>
       )}
-      <div className={styles.bar_inner} style={{ marginLeft: '40px', marginRight: '40px' }}>
-        <div className={styles.bar_type} style={{ marginLeft: '20px', marginRight: '20px' }}>
+      <div
+        className={styles.bar_inner}
+        style={{ marginLeft: "40px", marginRight: "40px" }}
+      >
+        <div
+          className={styles.bar_type}
+          style={{ marginLeft: "20px", marginRight: "20px" }}
+        >
           <Textarea
             transparent={true}
             rows="1"
@@ -494,7 +329,7 @@ export function MessageBar() {
             placeholder="Ask me anything..."
             onChange={(value) => setMessage(value)}
             onKeyDown={(e) => {
-              if (e.key === 'Enter' && !e.shiftKey) {
+              if (e.key === "Enter" && !e.shiftKey) {
                 e.preventDefault();
                 handleSendMessage();
               }
@@ -515,35 +350,199 @@ export function MessageBar() {
   );
 }
 
-export function MessageContainer() {
+export function MessageContainer({ handleSendMessage }) {
   const { message } = useMesssage();
   const { messages = [] } = message || {};
   return (
-    <React.Fragment>
+    <>
       {messages.length ? (
         <div className={styles.container}>
           {messages.map((item, index) => (
-            <MessageItem key={index} {...item} />
+            <MessageItem
+              key={index}
+              {...item}
+              onSuggestionClick={handleSendMessage}
+            />
           ))}
         </div>
       ) : (
         <ChatHelp />
       )}
-    </React.Fragment>
+    </>
   );
 }
 
 export function ChatMessage() {
-  const { is } = useGlobal();
+  const {
+    is,
+    typeingMessage,
+    setMessage,
+    clearTypeing,
+    setIs,
+    chat,
+    currentChat,
+    setState,
+  } = useGlobal();
+  const { message } = useMesssage();
+  const { messages = [] } = message || {};
+  const { currentUser } = useAuth();
+
+  const handleSendMessage = async (overrideMessage) => {
+    if (!currentUser) {
+      notification.warning({
+        message: "Authentication Required",
+        description: "Please login to chat with personas.",
+        placement: "topRight",
+      });
+      return;
+    }
+
+    const messageContent = overrideMessage || typeingMessage?.content;
+    if (!messageContent) return;
+
+    try {
+      setIs({ thinking: true });
+
+      // Create the user message object
+      const userMessage = {
+        role: "user",
+        content: messageContent,
+        sentTime: new Date().toISOString(),
+        id: Date.now(),
+        uid: currentUser?.uid || "anonymous",
+        userEmail: currentUser?.email || "anonymous",
+        persona: chat[currentChat]?.persona || null,
+      };
+
+      // Create a temporary assistant message
+      const assistantMessage = {
+        role: "assistant",
+        content: "Thinking...",
+        sentTime: new Date().toISOString(),
+        id: Date.now() + 1,
+        uid: currentUser?.uid || "anonymous",
+        userEmail: currentUser?.email || "anonymous",
+        persona: chat[currentChat]?.persona || null,
+      };
+
+      // Update chat immediately with both messages
+      const updatedMessages = [...messages, userMessage, assistantMessage];
+      const updatedChat = [...chat];
+      updatedChat[currentChat] = {
+        ...chat[currentChat],
+        messages: updatedMessages,
+      };
+
+      setState({ chat: updatedChat });
+      clearTypeing();
+
+      // Build conversation context for API
+      const contextMessages = messages.map((msg) => ({
+        role: msg.role,
+        content: msg.content,
+      }));
+      contextMessages.push({
+        role: userMessage.role,
+        content: userMessage.content,
+      });
+
+      let finalResponse = ""; // to store the complete response
+
+      try {
+        await sendChatMessage(
+          messageContent,
+          contextMessages,
+          async (response, suggestions) => {
+            if (response) {
+              finalResponse = response;
+              // Clean up response if needed
+              const cleanResponse = response
+                .replace(/What kind of pasta.*$/, "")
+                .trim();
+
+              const finalAssistantMessage = {
+                ...assistantMessage,
+                content: cleanResponse,
+                suggestions: suggestions || [],
+              };
+
+              const latestMessages = [
+                ...messages,
+                userMessage,
+                finalAssistantMessage,
+              ];
+              const newChat = [...chat];
+              newChat[currentChat] = {
+                ...chat[currentChat],
+                messages: latestMessages,
+              };
+
+              setState({ chat: newChat });
+            }
+
+            if (suggestions) {
+              // Store both messages in MongoDB
+              try {
+                const userResponse = await fetch(
+                  "http://34.44.230.187:3001/api/chats/store",
+                  {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                      ...userMessage,
+                      conversationId: currentChat,
+                      timestamp: new Date().toISOString(),
+                    }),
+                  }
+                );
+                if (!userResponse.ok) {
+                  throw new Error("Failed to store user message");
+                }
+                console.log("User message stored successfully");
+
+                const assistantResponse = await fetch(
+                  "http://34.44.230.187:3001/api/chats/store",
+                  {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                      ...assistantMessage,
+                      content: finalResponse,
+                      conversationId: currentChat,
+                      timestamp: new Date().toISOString(),
+                    }),
+                  }
+                );
+                if (!assistantResponse.ok) {
+                  throw new Error("Failed to store assistant message");
+                }
+                console.log("Assistant message stored successfully");
+              } catch (error) {
+                console.error("Failed to store messages:", error);
+              }
+            }
+          },
+          chat[currentChat]?.persona
+        );
+      } catch (error) {
+        console.error("Chat error:", error);
+      }
+    } catch (error) {
+      console.error("Failed to send message:", error);
+    } finally {
+      setIs({ thinking: false });
+    }
+  };
+
   return (
     <React.Fragment>
       <div className={styles.message}>
         <MessageHeader />
         <ScrollView>
-          <MessageContainer />
+          <MessageContainer handleSendMessage={handleSendMessage} />
           {is.thinking && <Loading />}
         </ScrollView>
-        <MessageBar />
+        <MessageBar handleSendMessage={handleSendMessage} />
       </div>
     </React.Fragment>
   );

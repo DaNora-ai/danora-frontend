@@ -159,6 +159,24 @@ export function AuthModal({ visible, onClose, onSignUpSuccess }) {
       fontWeight: "bold",
       cursor: "pointer",
     },
+    termsText: {
+      fontSize: "12px",
+      color: "#666",
+      textAlign: "center",
+      marginTop: "10px",
+      width: "100%",
+      display: "flex",
+      justifyContent: "center",
+      alignItems: "center",
+      gap: "4px"
+    },
+    termsLink: {
+      fontSize: "12px",
+      color: "#007BFF",
+      textDecoration: "underline",
+      cursor: "pointer",
+      display: "inline-block"
+    },
   };
 
   return (
@@ -231,24 +249,28 @@ export function AuthModal({ visible, onClose, onSignUpSuccess }) {
           {isLogin ? "Login" : "Sign Up"}
         </button>
 
-        {/* Toggle Login/Signup
-        <div style={styles.toggle}>
-          {isLogin ? (
-            <>
-              Don't have an account?
-              <span style={styles.toggleLink} onClick={() => setIsLogin(false)}>
-                Sign Up
-              </span>
-            </>
-          ) : (
-            <>
-              Already have an account?
-              <span style={styles.toggleLink} onClick={() => setIsLogin(true)}>
-                Login
-              </span>
-            </>
-          )}
-        </div> */}
+        {/* Terms and Privacy Notice */}
+        {!isLogin && (
+          <div style={styles.termsText}>
+            By signing up you agree to our{' '}
+            <a 
+              href="https://danora.ai/terms-and-conditions/"
+              style={styles.termsLink}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              terms of service
+            </a> and{' '}
+            <a 
+              href="https://danora.ai/privacy-policy/"
+              style={styles.termsLink}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              privacy policy
+            </a>
+          </div>
+        )}
       </div>
     </Modal>
   );
