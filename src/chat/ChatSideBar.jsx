@@ -32,13 +32,16 @@ export function ChatSideBar() {
             onClick={() => setState({ is: { ...is, apps: true } })}
           />
         </Tooltip>
-        <Tooltip title="Show Conversations" placement="right">
+        {/* <Tooltip title="Show Conversations" placement="right">
           <Icon 
             className={styles.icon} 
             type="history" 
-            onClick={() => setState({ is: { ...is, apps: false } })}
+            onClick={() => {
+              // setState({ is: { ...is, apps: false } }); //all conversations of all personas
+              setState({ is: { ...is, drawerVisible: true } }); //all conversations of current persona
+            }}
           />
-        </Tooltip>
+        </Tooltip> */}
         {/* <Tooltip title={`Switch to ${options.general.theme === 'light' ? 'Dark' : 'Light'} Theme`} placement="right">
           <Icon 
             className={styles.icon} 

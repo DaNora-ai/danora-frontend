@@ -298,3 +298,56 @@
   font-style: normal;
   font-variation-settings: "wdth" 100;
 }
+
+.drawer_conversations {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.drawer_header {
+  padding: 0 0 8px 0;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  margin-bottom: 8px;
+}
+
+.drawer_conversation_item {
+  padding: 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+
+  &:hover {
+    background-color: rgba(0, 0, 0, 0.04);
+  }
+}
+
+.drawer_conversation_active {
+  background-color: #e6f7ff;
+}
+
+.drawer_conversation_title {
+  font-size: 14px;
+  font-weight: 500;
+  margin-bottom: 4px;
+  color: rgba(0, 0, 0, 0.85);
+}
+
+.drawer_conversation_messages {
+  font-size: 12px;
+  color: rgba(0, 0, 0, 0.45);
+  margin-bottom: 4px;
+}
+
+.drawer_conversation_date {
+  font-size: 12px;
+  color: rgba(0, 0, 0, 0.45);
+  font-style: italic;
+}
+
+.drawer_empty {
+  text-align: center;
+  color: rgba(0, 0, 0, 0.45);
+  padding: 24px;
+  font-size: 14px;
+}

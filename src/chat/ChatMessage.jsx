@@ -25,12 +25,12 @@ import { useAuth } from "./context/AuthContext";
 import { signOut } from "firebase/auth";
 import { auth } from "./context/firebase.js";
 import { sendChatMessage } from "./service/chat";
-import { notification, Tooltip as AntdTooltip } from "antd";
+import { notification, Tooltip as AntdTooltip, Drawer } from "antd";
 import { Button as AntButton } from "antd";
 // import { insertToMongoDB } from './service/mongodb';
 
 export function MessageHeader() {
-  const { is, setIs, clearMessage, options } = useGlobal();
+  const { is, setIs, clearMessage, options, chat, currentChat, setState } = useGlobal();
   const { message } = useMesssage();
   const { messages = [] } = message || {};
   const columnIcon = is.sidebar ? "column-close" : "column-open";
@@ -39,8 +39,7 @@ export function MessageHeader() {
   const { currentUser } = useAuth();
   const [authModalVisible, setAuthModalVisible] = useState(false);
   const [adminPanelVisible, setAdminPanelVisible] = useState(false);
-  const [createProfileModalVisible, setCreateProfileModalVisible] =
-    useState(false);
+  const [createProfileModalVisible, setCreateProfileModalVisible] = useState(false);
   const [hasProfile, setHasProfile] = useState(false);
 
   // Show auth modal on page load if user is not logged in
@@ -129,6 +128,8 @@ export function MessageHeader() {
     }
   };
 
+  // console.log("++++",chat[currentChat]);
+
   return (
     <div className={classnames(styles.header)}>
       <Button
@@ -170,6 +171,26 @@ export function MessageHeader() {
                 Admin Panel
               </Button>
             )}
+
+            <AntdTooltip title="Clear Chat" placement="bottom">
+              <Icon
+                className={styles.icon}
+                type="clear"
+                onClick={clearMessage}
+                style={{ marginRight: "-8px" }}
+              />
+            </AntdTooltip>
+
+            <AntdTooltip title="Show Conversations" placement="bottom">
+              <Icon
+                className={styles.icon}
+                type="history"
+                onClick={() => setState({ is: { ...is, drawerVisible: true } })}
+                style={{ marginRight: "8px" }}
+                // icon={<Icon type="history" />}
+              />
+            </AntdTooltip>
+
             <AntButton danger onClick={handleLogout}>
               Logout
             </AntButton>
@@ -189,9 +210,7 @@ export function MessageHeader() {
             })
           }
         /> */}
-        <AntdTooltip title="Clear Chat" placement="bottom">
-          <Icon className={styles.icon} type="clear" onClick={clearMessage} />
-        </AntdTooltip>
+
         {/* <Icon
           className={styles.icon}
           type="more"
@@ -212,6 +231,101 @@ export function MessageHeader() {
         visible={createProfileModalVisible}
         onClose={handleProfileModalClose}
       />
+      <Drawer
+        title={`${
+          chat[currentChat]?.persona?.title || "Untitled"
+        } Conversations`}
+        placement="right"
+        onClose={() => setState({ is: { ...is, drawerVisible: false } })}
+        visible={is.drawerVisible}
+        width={320}
+      >
+        <div className={styles.drawer_conversations}>
+          <div className={styles.drawer_header}>
+            <AntButton
+              type="primary"
+              block
+              size="large"
+              onClick={() => {
+                const newChat = {
+                  title: chat[currentChat]?.persona?.title,
+                  id: Date.now(),
+                  messages: [],
+                  ct: Date.now(),
+                  icon: [2, "files"],
+                  persona: chat[currentChat]?.persona,
+                };
+                setState({
+                  chat: [...chat, newChat],
+                  currentChat: chat.length,
+                });
+                setState({ is: { ...is, drawerVisible: false } });
+              }}
+              style={{ marginBottom: "16px" }}
+            >
+              + New Conversation
+            </AntButton>
+          </div>
+          {chat
+            .filter((item) => {
+              const currentPersona = chat[currentChat]?.persona?.title;
+              const itemPersona = item.persona?.title;
+              return (
+                currentPersona && itemPersona && currentPersona === itemPersona
+              );
+            })
+            .map((item, index) => {
+              // Find the actual index in the original chat array
+              const originalIndex = chat.findIndex((c) => c === item);
+              return (
+                <div
+                  key={originalIndex}
+                  className={classnames(
+                    styles.drawer_conversation_item,
+                    currentChat === originalIndex &&
+                      styles.drawer_conversation_active
+                  )}
+                  onClick={() => {
+                    setState({ currentChat: originalIndex });
+                    setState({ is: { ...is, drawerVisible: false } });
+                  }}
+                >
+                  <div className={styles.drawer_conversation_title}>
+                    {item.title || "Untitled Conversation"}
+                  </div>
+                  <div className={styles.drawer_conversation_messages}>
+                    {item.messages?.length || 0} messages
+                  </div>
+                  <div className={styles.drawer_conversation_date}>
+                    {new Date(
+                      item.messages[item.messages.length - 1]?.sentTime ||
+                        item.ct
+                    ).toLocaleString("en-US", {
+                      year: "numeric",
+                      month: "short",
+                      day: "numeric",
+                      hour: "2-digit",
+                      minute: "2-digit",
+                      hour12: true,
+                    })}
+                  </div>
+                </div>
+              );
+            })}
+          {!chat.some((item) => {
+            const currentPersona = chat[currentChat]?.persona?.title;
+            const itemPersona = item.persona?.title;
+            return (
+              currentPersona && itemPersona && currentPersona === itemPersona
+            );
+          }) && (
+            <div className={styles.drawer_empty}>
+              No conversations with{" "}
+              {chat[currentChat]?.persona?.title || "this persona"} yet
+            </div>
+          )}
+        </div>
+      </Drawer>
     </div>
   );
 }

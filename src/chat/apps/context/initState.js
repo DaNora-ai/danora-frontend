@@ -1,11 +1,11 @@
 export const initApps = {
   userPersonas: [],
   category: [
-    {
-      title: "General",
-      icon: "assistants",
-      id: 1,
-    },
+    // {
+    //   title: "General",
+    //   icon: "assistants",
+    //   id: 1,
+    // },
     {
       title: "Fashion",
       icon: "productivity",
@@ -29,12 +29,12 @@ export const initApps = {
   ],
   current: 0,
   apps: [
-    {
-      title: "General Assistant (Alex)",
-      desc: "Your versatile AI companion for everyday tasks",
-      role: "system",
-      id: 1,
-    },
+    // {
+    //   title: "General Assistant (Alex)",
+    //   desc: "Your versatile AI companion for everyday tasks",
+    //   role: "system",
+    //   id: 1,
+    // },
     {
       title: "Fashion Guru (Morgan)",
       desc: "Your expert fashion advisor and style consultant",

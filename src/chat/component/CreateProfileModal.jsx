@@ -618,7 +618,7 @@ export function CreateProfileModal({ visible, onClose, isPersonaOnly = false }) 
           fontSize: "20px", 
           fontWeight: "600" 
         }}>
-          {hasProfile ? "Edit Profile" : (currentStep === 0 ? "Create Profile" : "Create Persona")}
+          {hasProfile ? "Edit Profile" : (currentStep === 0 ? "Create Profile" : "Create Target Persona")}
         </span>
       }
       draggable={false}
