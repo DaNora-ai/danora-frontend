@@ -298,8 +298,16 @@ export function MessageItem(props) {
 }
 
 export function MessageBar({ handleSendMessage }) {
-  const { is, options, setIs, typeingMessage, setMessage } = useGlobal();
+  const { is, options, typeingMessage, setMessage, setIs } = useGlobal();
   useSendKey(handleSendMessage, options.general.command);
+
+  // Modified handleClick: explicitly pass the current message text
+  const handleClick = (e) => {
+    e.preventDefault();
+    if (typeingMessage?.content?.trim()) {
+      handleSendMessage(typeingMessage.content);
+    }
+  };
 
   return (
     <div className={styles.bar}>
@@ -340,10 +348,13 @@ export function MessageBar({ handleSendMessage }) {
         <div className={styles.bar_actions}>
           <Button
             type="primary"
-            onClick={handleSendMessage}
+            onClick={handleClick}
+            // onMouseEnter={handleClick}
             className={styles.send_button}
+            // If you wish, you can remove the disabled attribute so that hover sends regardless
+            disabled={is.thinking || !typeingMessage?.content?.trim()}
             icon="send"
-          />
+          ></Button>
         </div>
       </div>
     </div>
