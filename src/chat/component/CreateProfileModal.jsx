@@ -10,6 +10,7 @@ import {
   Steps,
   Space,
   notification,
+  Spin,
 } from "antd";
 import { UploadOutlined } from "@ant-design/icons";
 import { auth } from "../context/firebase";
@@ -92,7 +93,7 @@ export function CreateProfileModal({ visible, onClose, isPersonaOnly = false }) 
         uid: user.uid,
 
         // User Details (from stored state)
-        age_range: userDetails?.age_range || "",
+        // age_range: userDetails?.age_range || "",
         gender: userDetails?.gender_identity || "",
         location: userDetails?.location || "",
         income_level: userDetails?.income_level || "",
@@ -100,6 +101,7 @@ export function CreateProfileModal({ visible, onClose, isPersonaOnly = false }) 
         industry: userDetails?.industry || "",
 
         // Persona Details
+        age_range: values?.age_range || "",
         company_url: values.company_url || "",
         persona_name: values.persona_name || "",
         persona_role: values.persona_role || "",
@@ -153,16 +155,57 @@ export function CreateProfileModal({ visible, onClose, isPersonaOnly = false }) 
 
   const handleUpdateProfile = async (values) => {
     try {
+      setIsGenerating(true);
       const user = auth.currentUser;
       if (!user) {
         setError("No user is currently signed in");
         return;
       }
 
-      // Combine user details with current form values
+      // First generate the prompt
+      const promptPayload = {
+        uid: user.uid,
+        gender: userDetails?.gender_identity || "",
+        location: userDetails?.location || "",
+        income_level: userDetails?.income_level || "",
+        job_title: userDetails?.job_title || "",
+        industry: userDetails?.industry || "",
+        age_range: values?.age_range || "",
+        company_url: values.company_url || "",
+        persona_name: values.persona_name || "",
+        persona_role: values.persona_role || "",
+        persona_traits: values.persona_traits || "",
+        persona_bio: values.persona_bio || "",
+        persona_pronouns: values.persona_pronouns || "",
+        persona_type: values.persona_type,
+        tone: values.tone || "",
+        preferred_language: values.preferred_language || "",
+        response_length: values.response_length || "",
+        response_depth: values.response_depth || "",
+        response_behavior: values.response_behavior || "",
+        interaction_style: values.interaction_style || "",
+      };
+
+      const promptResponse = await fetch("http://34.44.230.187:8000/prompt_generator", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(promptPayload),
+      });
+
+      if (!promptResponse.ok) {
+        throw new Error('Failed to generate prompt');
+      }
+
+      const promptData = await promptResponse.json();
+      const generatedPrompt = promptData.prompt || promptData.response || promptData;
+
+      // Combine user details with current form values and generated prompt
       const combinedValues = {
-        ...userDetails, // Include stored user details from first step
-        ...values, // Current form values (persona details)
+        ...userDetails,
+        ...values,
+        persona_prompt: generatedPrompt,
         uid: user.uid,
         email: user.email,
       };
@@ -242,6 +285,8 @@ export function CreateProfileModal({ visible, onClose, isPersonaOnly = false }) 
         placement: "topRight",
       });
       setError(err.message);
+    } finally {
+      setIsGenerating(false);
     }
   };
 
@@ -368,12 +413,27 @@ export function CreateProfileModal({ visible, onClose, isPersonaOnly = false }) 
       </Form.Item>
 
       <Form.Item
+        name="age_range"
+        label="Age Range"
+        // rules={[{ required: true, message: "Please select an age range of the persona" }]}
+      >
+        <Select placeholder="Select age range of the persona">
+          <Select.Option value="18-24">18-24</Select.Option>
+          <Select.Option value="25-34">25-34</Select.Option>
+          <Select.Option value="35-44">35-44</Select.Option>
+          <Select.Option value="45-54">45-54</Select.Option>
+          <Select.Option value="55-64">55-64</Select.Option>
+          <Select.Option value="65+">65+</Select.Option>
+        </Select>
+      </Form.Item>
+
+      <Form.Item
         name="persona_type"
         label="Persona Expertise"
         rules={[{ required: true, message: "Please select a persona type" }]}
       >
         <Select placeholder="Select persona type">
-          <Select.Option value="general">General</Select.Option>
+          {/* <Select.Option value="general">General</Select.Option> */}
           <Select.Option value="fashion">Fashion</Select.Option>
           <Select.Option value="luxury">Luxury</Select.Option>
           <Select.Option value="food">Food</Select.Option>
@@ -577,31 +637,6 @@ export function CreateProfileModal({ visible, onClose, isPersonaOnly = false }) 
 
       {/* Persona Prompt */}
       {/* <Divider orientation="left">Persona Prompt</Divider> */}
-      <Form.Item
-        name="persona_prompt"
-        label={
-          <Button
-            type="primary"
-            size="small"
-            onClick={handleGenerateChat}
-            loading={isGenerating}
-            htmlType="button"
-          >
-            {isGenerating ? "Generating..." : "Generate Persona Description"}
-          </Button>
-        }
-        rules={[
-          {
-            required: true,
-            message: "Please generate or enter a persona description",
-          },
-        ]}
-      >
-        <TextArea
-          rows={4}
-          placeholder="Enter a prompt to generate chat with this persona"
-        />
-      </Form.Item>
     </>
   );
 
@@ -624,115 +659,107 @@ export function CreateProfileModal({ visible, onClose, isPersonaOnly = false }) 
       draggable={false}
     >
       <div className={styles.profileContainer}>
-        {/* {!isPersonaOnly && (
-          <Steps
-            current={currentStep}
-            items={[{ title: "Business Details" }, { title: "Persona Details" }]}
-            style={{ marginBottom: "24px" }}
-          />
-        )} */}
-
-        <Form
-          form={form}
-          layout="vertical"
-          onFinish={handleUpdateProfile}
-          className={styles.form}
-          onSubmit={(e) => e.preventDefault()}
-        >
-          {isPersonaOnly ? renderPersonaDetailsStep() : (currentStep === 0 ? renderUserDetailsStep() : renderPersonaDetailsStep())}
-
-          <Form.Item 
-            style={{ 
-              textAlign: "center", 
-              marginTop: "26px",
-              marginBottom: "8px"
-            }}
+        <Spin spinning={isGenerating} tip="Creating persona...">
+          <Form
+            form={form}
+            layout="vertical"
+            onFinish={handleUpdateProfile}
+            className={styles.form}
+            onSubmit={(e) => e.preventDefault()}
           >
-            {!isPersonaOnly && currentStep > 0 && (
-              <Button
-                onClick={handlePrevious}
-                style={{ marginRight: "8px" }}
-                htmlType="button"
-              >
-                Previous
-              </Button>
-            )}
-            {!isPersonaOnly && currentStep < 1 ? (
-              <Space size="large" style={{ width: '100%', justifyContent: 'space-between' }}>
-                {/* <Button 
-                  type="primary" 
-                  onClick={handleNext} 
-                  htmlType="button"
-                  style={{
-                    backgroundColor: "#1890ff",
-                    width: "48%",
-                  }}
-                >
-                  Register
-                </Button> */}
-                <Button 
-                  type="primary"
-                  onClick={async (e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    
-                    try {
-                      const values = await form.validateFields(['job_title', 'company_size', 'company_url', 'company_bio']);
-                      const user = auth.currentUser;
-                      if (!user) {
-                        setError("No user is currently signed in");
-                        return;
-                      }
+            {isPersonaOnly ? renderPersonaDetailsStep() : (currentStep === 0 ? renderUserDetailsStep() : renderPersonaDetailsStep())}
 
-                      const businessDetails = {
-                        uid: user.uid,
-                        email: user.email,
-                        job_title: values.job_title,
-                        company_size: values.company_size,
-                        company_url: values.company_url,
-                        company_bio: values.company_bio
-                      };
-
-                      const response = await fetch(
-                        "http://34.44.230.187:3001/api/profiles/create",
-                        {
-                          method: "POST",
-                          headers: {
-                            "Content-Type": "application/json",
-                          },
-                          body: JSON.stringify(businessDetails),
+            <Form.Item 
+              style={{ 
+                textAlign: "center", 
+                marginTop: "26px",
+                marginBottom: "8px"
+              }}
+            >
+              {!isPersonaOnly && currentStep < 1 ? (
+                <Space size="large" style={{ width: '100%', justifyContent: 'space-between' }}>
+                  <Button 
+                    type="primary"
+                    onClick={async (e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      
+                      try {
+                        const values = await form.validateFields(['job_title', 'company_size', 'company_url', 'company_bio']);
+                        const user = auth.currentUser;
+                        if (!user) {
+                          setError("No user is currently signed in");
+                          return;
                         }
-                      );
 
-                      if (!response.ok) {
-                        const errorData = await response.json();
-                        throw new Error(errorData.error || "Failed to save business details");
+                        const businessDetails = {
+                          uid: user.uid,
+                          email: user.email,
+                          job_title: values.job_title,
+                          company_size: values.company_size,
+                          company_url: values.company_url,
+                          company_bio: values.company_bio
+                        };
+
+                        const response = await fetch(
+                          "http://34.44.230.187:3001/api/profiles/create",
+                          {
+                            method: "POST",
+                            headers: {
+                              "Content-Type": "application/json",
+                            },
+                            body: JSON.stringify(businessDetails),
+                          }
+                        );
+
+                        if (!response.ok) {
+                          const errorData = await response.json();
+                          throw new Error(errorData.error || "Failed to save business details");
+                        }
+
+                        // Show success notification
+                        notification.success({
+                          message: "Success",
+                          description: "Business details saved successfully!",
+                          placement: "topRight",
+                        });
+                        
+                        setSuccess("Business details saved successfully!");
+                        
+                        // Store the business details for later use
+                        setUserDetails(businessDetails);
+                        
+                        // Move to the next step (Persona Details)
+                        setCurrentStep(1);
+                      } catch (err) {
+                        // Show error notification
+                        notification.error({
+                          message: "Error",
+                          description: err.message || "Failed to save business details",
+                          placement: "topRight",
+                        });
+                        setError(err.message);
                       }
-
-                      // Show success notification
-                      notification.success({
-                        message: "Success",
-                        description: "Business details saved successfully!",
-                        placement: "topRight",
-                      });
-                      
-                      setSuccess("Business details saved successfully!");
-                      
-                      // Store the business details for later use
-                      setUserDetails(businessDetails);
-                      
-                      // Move to the next step (Persona Details)
-                      setCurrentStep(1);
-                    } catch (err) {
-                      // Show error notification
-                      notification.error({
-                        message: "Error",
-                        description: err.message || "Failed to save business details",
-                        placement: "topRight",
-                      });
-                      setError(err.message);
-                    }
-                  }}
+                    }}
+                    size="large"
+                    block
+                    style={{
+                      height: "40px",
+                      fontSize: "16px",
+                      fontWeight: "500",
+                      borderRadius: "6px",
+                      boxShadow: "0 2px 0 rgba(0, 0, 0, 0.045)",
+                      borderColor: "#1890ff",
+                      color: "white"
+                    }}
+                  >
+                    Register and proceed
+                  </Button>
+                </Space>
+              ) : (
+                <Button
+                  type="primary"
+                  htmlType="submit"
                   size="large"
                   block
                   style={{
@@ -741,35 +768,16 @@ export function CreateProfileModal({ visible, onClose, isPersonaOnly = false }) 
                     fontWeight: "500",
                     borderRadius: "6px",
                     boxShadow: "0 2px 0 rgba(0, 0, 0, 0.045)",
-                    borderColor: "#1890ff",
-                    color: "white"
+                    marginBottom: "68px"
                   }}
                 >
-                  Register and proceed
+                  {hasProfile ? "Save Changes" : (isPersonaOnly ? "Create Persona" : "Create Persona")}
                 </Button>
-              </Space>
-            ) : (
-              <Button
-                type="primary"
-                htmlType="submit"
-                size="large"
-                block
-                style={{
-                  height: "40px",
-                  fontSize: "16px",
-                  fontWeight: "500",
-                  borderRadius: "6px",
-                  boxShadow: "0 2px 0 rgba(0, 0, 0, 0.045)",
-                  marginBottom: "68px"
-                }}
-              >
-                {hasProfile ? "Save Changes" : (isPersonaOnly ? "Create Persona" : "Create Persona")}
-              </Button>
-            )}
-          </Form.Item>
-        </Form>
+              )}
+            </Form.Item>
+          </Form>
+        </Spin>
         {error && <div className={styles.error}>{error}</div>}
-        {/* {success && <div className={styles.success}>{success}</div>} */}
       </div>
     </Modal>
   );
