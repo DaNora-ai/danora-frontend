@@ -396,6 +396,15 @@ export function CreateProfileModal({ visible, onClose, isPersonaOnly = false }) 
 
   const renderPersonaDetailsStep = () => (
     <>
+      <div style={{ 
+        marginBottom: "24px", 
+        fontSize: "16px", 
+        color: "#666",
+        textAlign: "center",
+        lineHeight: "1.5"
+      }}>
+        Create your perfect, ultra-detailed target persona in just a few clicks—built from 1M+ real social media posts!
+      </div>
       {/* Persona Details */}
       <Divider orientation="left">Persona Details</Divider>
       <Form.Item

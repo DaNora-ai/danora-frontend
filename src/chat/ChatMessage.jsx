@@ -26,11 +26,12 @@ import { signOut } from "firebase/auth";
 import { auth } from "./context/firebase.js";
 import { sendChatMessage } from "./service/chat";
 import { notification, Tooltip as AntdTooltip, Drawer } from "antd";
-import { Button as AntButton } from "antd";
+import { Button as AntButton, FloatButton } from "antd"; // <-- Added FloatButton import
 // import { insertToMongoDB } from './service/mongodb';
 
 export function MessageHeader() {
-  const { is, setIs, clearMessage, options, chat, currentChat, setState } = useGlobal();
+  const { is, setIs, clearMessage, options, chat, currentChat, setState } =
+    useGlobal();
   const { message } = useMesssage();
   const { messages = [] } = message || {};
   const columnIcon = is.sidebar ? "column-close" : "column-open";
@@ -39,7 +40,8 @@ export function MessageHeader() {
   const { currentUser } = useAuth();
   const [authModalVisible, setAuthModalVisible] = useState(false);
   const [adminPanelVisible, setAdminPanelVisible] = useState(false);
-  const [createProfileModalVisible, setCreateProfileModalVisible] = useState(false);
+  const [createProfileModalVisible, setCreateProfileModalVisible] =
+    useState(false);
   const [hasProfile, setHasProfile] = useState(false);
 
   // Show auth modal on page load if user is not logged in
@@ -128,8 +130,6 @@ export function MessageHeader() {
     }
   };
 
-  // console.log("++++",chat[currentChat]);
-
   return (
     <div className={classnames(styles.header)}>
       <Button
@@ -177,19 +177,18 @@ export function MessageHeader() {
                 className={styles.icon}
                 type="clear"
                 onClick={clearMessage}
-                style={{ marginRight: "-8px" }}
+                style={{ marginRight: "8px" }}
               />
             </AntdTooltip>
 
-            <AntdTooltip title="Show Conversations" placement="bottom">
+            {/* <AntdTooltip title="Chat History" placement="bottom">
               <Icon
                 className={styles.icon}
                 type="history"
                 onClick={() => setState({ is: { ...is, drawerVisible: true } })}
                 style={{ marginRight: "8px" }}
-                // icon={<Icon type="history" />}
               />
-            </AntdTooltip>
+            </AntdTooltip> */}
 
             <AntButton danger onClick={handleLogout}>
               Logout
@@ -200,23 +199,6 @@ export function MessageHeader() {
             Register into Danora
           </Button>
         )}
-
-        {/* <Icon
-          className={styles.icon}
-          type={options.general.theme}
-          onClick={() =>
-            setGeneral({
-              theme: options.general.theme === "light" ? "dark" : "light",
-            })
-          }
-        /> */}
-
-        {/* <Icon
-          className={styles.icon}
-          type="more"
-          onClick={handleAdminPanelClick}
-        /> */}
-        {/* <Icon type="download" className={styles.icon} /> */}
       </div>
       <AuthModal
         visible={authModalVisible}
@@ -463,9 +445,7 @@ export function MessageBar({ handleSendMessage }) {
           <Button
             type="primary"
             onClick={handleClick}
-            // onMouseEnter={handleClick}
             className={styles.send_button}
-            // If you wish, you can remove the disabled attribute so that hover sends regardless
             disabled={is.thinking || !typeingMessage?.content?.trim()}
             icon="send"
           ></Button>
@@ -668,6 +648,142 @@ export function ChatMessage() {
           {is.thinking && <Loading />}
         </ScrollView>
         <MessageBar handleSendMessage={handleSendMessage} />
+
+        {/* FloatButton that shows only when drawer is closed */}
+        {!is.drawerVisible && (
+          <AntdTooltip title="Chat History" placement="left">
+            <FloatButton
+              icon={
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    width: "100%",
+                    height: "100%",
+                  }}
+                >
+                  <Icon
+                    onClick={() => setState({ is: { ...is, drawerVisible: true } })}
+                    type="history"
+                    style={{
+                      fontSize: "20px",
+                      margin: 0,
+                      padding: 0,
+                    }}
+                  />
+                </div>
+              }
+              type="primary"
+              style={{
+                right: 24,
+                top: 120,
+                width: "44px",
+                height: "44px",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+              onClick={() => setState({ is: { ...is, drawerVisible: true } })}
+            />
+          </AntdTooltip>
+        )}
+
+        <Drawer
+          title={`${
+            chat[currentChat]?.persona?.title || "Untitled"
+          } Conversations`}
+          placement="right"
+          onClose={() => setState({ is: { ...is, drawerVisible: false } })}
+          visible={is.drawerVisible}
+          width={320}
+        >
+          <div className={styles.drawer_conversations}>
+            <div className={styles.drawer_header}>
+              <AntButton
+                type="primary"
+                block
+                size="large"
+                onClick={() => {
+                  const newChat = {
+                    title: chat[currentChat]?.persona?.title,
+                    id: Date.now(),
+                    messages: [],
+                    ct: Date.now(),
+                    icon: [2, "files"],
+                    persona: chat[currentChat]?.persona,
+                  };
+                  setState({
+                    chat: [...chat, newChat],
+                    currentChat: chat.length,
+                  });
+                  setState({ is: { ...is, drawerVisible: false } });
+                }}
+                style={{ marginBottom: "16px" }}
+              >
+                + New Conversation
+              </AntButton>
+            </div>
+            {chat
+              .filter((item) => {
+                const currentPersona = chat[currentChat]?.persona?.title;
+                const itemPersona = item.persona?.title;
+                return (
+                  currentPersona && itemPersona && currentPersona === itemPersona
+                );
+              })
+              .map((item, index) => {
+                // Find the actual index in the original chat array
+                const originalIndex = chat.findIndex((c) => c === item);
+                return (
+                  <div
+                    key={originalIndex}
+                    className={classnames(
+                      styles.drawer_conversation_item,
+                      currentChat === originalIndex &&
+                        styles.drawer_conversation_active
+                    )}
+                    onClick={() => {
+                      setState({ currentChat: originalIndex });
+                      setState({ is: { ...is, drawerVisible: false } });
+                    }}
+                  >
+                    <div className={styles.drawer_conversation_title}>
+                      {item.title || "Untitled Conversation"}
+                    </div>
+                    <div className={styles.drawer_conversation_messages}>
+                      {item.messages?.length || 0} messages
+                    </div>
+                    <div className={styles.drawer_conversation_date}>
+                      {new Date(
+                        item.messages[item.messages.length - 1]?.sentTime ||
+                          item.ct
+                      ).toLocaleString("en-US", {
+                        year: "numeric",
+                        month: "short",
+                        day: "numeric",
+                        hour: "2-digit",
+                        minute: "2-digit",
+                        hour12: true,
+                      })}
+                    </div>
+                  </div>
+                );
+              })}
+            {!chat.some((item) => {
+              const currentPersona = chat[currentChat]?.persona?.title;
+              const itemPersona = item.persona?.title;
+              return (
+                currentPersona && itemPersona && currentPersona === itemPersona
+              );
+            }) && (
+              <div className={styles.drawer_empty}>
+                No conversations with{" "}
+                {chat[currentChat]?.persona?.title || "this persona"} yet
+              </div>
+            )}
+          </div>
+        </Drawer>
       </div>
     </React.Fragment>
   );
