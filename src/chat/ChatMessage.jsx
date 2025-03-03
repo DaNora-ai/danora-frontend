@@ -676,6 +676,7 @@ export function ChatMessage() {
               }
               type="primary"
               style={{
+                zIndex: 0,
                 right: 24,
                 top: 120,
                 width: "44px",
