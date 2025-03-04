@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   Avatar,
   Icon,
@@ -26,8 +26,17 @@ import { signOut } from "firebase/auth";
 import { auth } from "./context/firebase.js";
 import { sendChatMessage } from "./service/chat";
 import { notification, Tooltip as AntdTooltip, Drawer } from "antd";
-import { Button as AntButton, FloatButton } from "antd"; // <-- Added FloatButton import
+import { Button as AntButton, FloatButton, message as antMessage } from "antd"; // <-- Added FloatButton import
 // import { insertToMongoDB } from './service/mongodb';
+
+// Helper function to get message preview
+const getMessagePreview = (messages) => {
+  if (messages && messages.length > 0 && messages[0].content) {
+    const content = messages[0].content;
+    return content.substring(0, 10) + (content.length > 10 ? '...' : '');
+  }
+  return "New Chat";
+};
 
 export function MessageHeader() {
   const { is, setIs, clearMessage, options, chat, currentChat, setState } =
@@ -245,7 +254,7 @@ export function MessageHeader() {
               }}
               style={{ marginBottom: "16px" }}
             >
-              + New Conversation
+              + New Chat
             </AntButton>
           </div>
           {chat
@@ -253,7 +262,10 @@ export function MessageHeader() {
               const currentPersona = chat[currentChat]?.persona?.title;
               const itemPersona = item.persona?.title;
               return (
-                currentPersona && itemPersona && currentPersona === itemPersona
+                currentPersona && 
+                itemPersona && 
+                currentPersona === itemPersona &&
+                (item.messages?.length > 0) // Filter out conversations with 0 messages
               );
             })
             .map((item, index) => {
@@ -273,7 +285,7 @@ export function MessageHeader() {
                   }}
                 >
                   <div className={styles.drawer_conversation_title}>
-                    {item.title || "Untitled Conversation"}
+                    {getMessagePreview(item.messages)}
                   </div>
                   <div className={styles.drawer_conversation_messages}>
                     {item.messages?.length || 0} messages
@@ -664,7 +676,13 @@ export function ChatMessage() {
                   }}
                 >
                   <Icon
-                    onClick={() => setState({ is: { ...is, drawerVisible: true } })}
+                    onClick={() => {
+                      if (!currentUser) {
+                        antMessage.error("Please login");
+                        return;
+                      }
+                      setState({ is: { ...is, drawerVisible: true } });
+                    }}
                     type="history"
                     style={{
                       fontSize: "20px",
@@ -685,7 +703,13 @@ export function ChatMessage() {
                 alignItems: "center",
                 justifyContent: "center",
               }}
-              onClick={() => setState({ is: { ...is, drawerVisible: true } })}
+              onClick={() => {
+                if (!currentUser) {
+                  antMessage.error("Please login");
+                  return;
+                }
+                setState({ is: { ...is, drawerVisible: true } });
+              }}
             />
           </AntdTooltip>
         )}
@@ -722,7 +746,7 @@ export function ChatMessage() {
                 }}
                 style={{ marginBottom: "16px" }}
               >
-                + New Conversation
+                + New Chat
               </AntButton>
             </div>
             {chat
@@ -730,7 +754,10 @@ export function ChatMessage() {
                 const currentPersona = chat[currentChat]?.persona?.title;
                 const itemPersona = item.persona?.title;
                 return (
-                  currentPersona && itemPersona && currentPersona === itemPersona
+                  currentPersona &&
+                  itemPersona &&
+                  currentPersona === itemPersona &&
+                  item.messages?.length > 0 // Filter out conversations with 0 messages
                 );
               })
               .map((item, index) => {
@@ -750,7 +777,7 @@ export function ChatMessage() {
                     }}
                   >
                     <div className={styles.drawer_conversation_title}>
-                      {item.title || "Untitled Conversation"}
+                      {getMessagePreview(item.messages)}
                     </div>
                     <div className={styles.drawer_conversation_messages}>
                       {item.messages?.length || 0} messages

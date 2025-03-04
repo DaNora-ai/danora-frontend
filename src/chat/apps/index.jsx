@@ -10,8 +10,23 @@ import { CreateProfileModal } from '../component/CreateProfileModal'
 import { message as antMessage } from 'antd'
 
 export function AppItem(props) {
-  const { newChat } = useGlobal();
-  console.log(props);
+  const { newChat, chat, currentChat } = useGlobal();
+  
+  // Get the displayable name for this item
+  const itemName = props.title || props.persona_name;
+  
+  // Get the current active persona name from the chat
+  const activePersonaName = chat[currentChat]?.persona?.title;
+  
+  console.log('Comparing:', {
+    'Item Name': itemName,
+    'Active Persona': activePersonaName,
+    'Matches': itemName === activePersonaName
+  });
+  
+  // This persona is active if its name matches the current active persona name
+  const isActive = itemName === activePersonaName;
+  
   const handleClick = () => {
     const persona = {
       title: props.title || props.persona_name,
@@ -23,12 +38,21 @@ export function AppItem(props) {
   };
 
   return (
-    <div className={styles.app} onClick={handleClick}>
+    <div 
+      className={classnames(
+        styles.app, 
+        isActive && styles.app_active
+      )} 
+      onClick={handleClick}
+    >
       {/* <div className={classnames(styles.app_icon, `ico-prompts`)}></div> */}
       <div className={styles.app_content}>
         <div className={styles.app_title}>{props.title || props.persona_name}</div>
         <div className={styles.app_desc}>{props.desc || props.persona_bio}</div>
       </div>
+      {isActive && (
+        <div className={styles.app_indicator}>●</div>
+      )}
     </div>
   )
 }

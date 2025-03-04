@@ -269,14 +269,17 @@ export function CreateProfileModal({ visible, onClose, isPersonaOnly = false }) 
       // Start a new chat with this persona
       newChat(newPersona);
 
+      // Reset form and close modal with a delay, then reload the page
       setTimeout(() => {
         form.resetFields();
         setUserDetails(null);
         onClose();
+        
+        // Add a small delay after the modal is closed before reloading
+        setTimeout(() => {
+          window.location.reload();
+        }, 200);
       }, 1500);
-
-      // Reload the page to update the personas list
-      window.location.reload();
     } catch (err) {
       // Show error notification
       notification.error({
