@@ -29,7 +29,7 @@ export function AuthModal({ visible, onClose, onSignUpSuccess }) {
         authProvider: user.providerData[0]?.providerId || 'email'
       };
 
-      const response = await fetch('http://34.44.230.187:3001/api/users/create', {
+      const response = await fetch('http://34.44.230.187:30013001/api/users/create', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -91,7 +91,7 @@ export function AuthModal({ visible, onClose, onSignUpSuccess }) {
     modalContent: {
       display: "flex",
       flexDirection: "row",
-      width: "100%",
+      width: "1200px",
       minHeight: "600px",
     },
     leftSide: {
@@ -101,7 +101,7 @@ export function AuthModal({ visible, onClose, onSignUpSuccess }) {
       flexDirection: "column",
       justifyContent: "center",
       height: "100%",
-      marginTop: "162px",
+      marginTop: "74px",
     },
     rightSide: {
       flex: "3",
@@ -115,7 +115,7 @@ export function AuthModal({ visible, onClose, onSignUpSuccess }) {
       alignItems: "center",
       borderTopRightRadius: "8px",
       borderBottomRightRadius: "8px",
-      height: "100%",
+      // height: "100%",
       overflow: "auto",
     },
     logoContainer: {
@@ -266,9 +266,9 @@ export function AuthModal({ visible, onClose, onSignUpSuccess }) {
       visible={visible}
       onClose={onClose}
       title={isLogin ? "Login" : "Sign Up"}
-      width="1000px"
+      width={1200}
       draggable={false}
-      style={{ height: "auto", maxHeight: "90vh" }}
+      style={{ height: "auto", maxHeight: "90vh", maxWidth: "95vw" }}
     >
       <div style={styles.modalContent}>
         {/* Left Side - Auth Form */}
@@ -304,37 +304,37 @@ export function AuthModal({ visible, onClose, onSignUpSuccess }) {
             </button>
 
             {/* Separator */}
-            {/* <div style={styles.separator}>
+            <div style={styles.separator}>
               <div style={styles.separatorLine}></div>
               <span>OR</span>
               <div style={styles.separatorLine}></div>
-            </div> */}
+            </div>
 
             {/* Email Input */}
-            {/* <input
+            <input
               style={styles.input}
               type="email"
               placeholder="Email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-            /> */}
+            />
 
             {/* Password Input */}
-            {/* <input
+            <input
               style={styles.input}
               type="password"
               placeholder="Password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-            /> */}
+            />
 
             {/* Error Message */}
             {/* {error && <div style={styles.error}>{error}</div>} */}
 
             {/* Submit Button */}
-            {/* <button style={styles.submitButton} onClick={handleEmailAuth}>
+            <button style={styles.submitButton} onClick={handleEmailAuth}>
               {isLogin ? "Login" : "Sign Up"}
-            </button> */}
+            </button>
 
             {/* Terms and Privacy Notice */}
             {!isLogin && (

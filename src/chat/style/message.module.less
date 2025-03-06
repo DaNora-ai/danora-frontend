@@ -312,13 +312,20 @@
 }
 
 .drawer_conversation_item {
-  padding: 12px;
+  padding: 12px 44px 12px 12px;
   border-radius: 8px;
   cursor: pointer;
-  transition: background-color 0.3s ease;
+  transition: all 0.2s ease;
+  position: relative;
 
   &:hover {
     background-color: rgba(0, 0, 0, 0.04);
+    
+    .drawer_conversation_delete {
+      opacity: 1;
+      visibility: visible;
+      background-color: rgba(0, 0, 0, 0.05);
+    }
   }
 }
 
@@ -350,4 +357,39 @@
   color: rgba(0, 0, 0, 0.45);
   padding: 24px;
   font-size: 14px;
+}
+
+.drawer_conversation_delete {
+  position: absolute;
+  top: 50%;
+  right: 12px;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background-color: transparent;
+  cursor: pointer;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.2s ease;
+  z-index: 1;
+  transform: translateY(-50%);
+
+  &:hover {
+    background-color: rgba(255, 0, 0, 0.1);
+    color: #ff4d4f;
+  }
+}
+
+:global {
+  .ant-drawer-mask {
+    pointer-events: none !important;
+    background: none !important;
+  }
+  
+  .ant-drawer-content-wrapper {
+    pointer-events: auto;
+  }
 }

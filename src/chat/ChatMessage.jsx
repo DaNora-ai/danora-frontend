@@ -8,7 +8,7 @@ import {
   Button,
   Popover,
 } from "@/components";
-import { RobotOutlined, UserOutlined } from "@ant-design/icons";
+import { RobotOutlined, UserOutlined, DeleteOutlined } from "@ant-design/icons";
 import { CopyIcon, ScrollView, Error, EmptyChat, ChatHelp } from "./component";
 import { MessageRender } from "./MessageRender";
 import { ConfigInfo } from "./ConfigInfo";
@@ -25,7 +25,7 @@ import { useAuth } from "./context/AuthContext";
 import { signOut } from "firebase/auth";
 import { auth } from "./context/firebase.js";
 import { sendChatMessage } from "./service/chat";
-import { notification, Tooltip as AntdTooltip, Drawer } from "antd";
+import { notification, Tooltip as AntdTooltip, Drawer, Modal } from "antd";
 import { Button as AntButton, FloatButton, message as antMessage } from "antd"; // <-- Added FloatButton import
 // import { insertToMongoDB } from './service/mongodb';
 
@@ -37,6 +37,93 @@ const getMessagePreview = (messages) => {
   }
   return "New Chat";
 };
+
+// New ConversationItem component
+function ConversationItem({ item, index, chat, currentChat, is, setState }) {
+  const originalIndex = chat.findIndex((c) => c === item);
+  
+  const handleDelete = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    Modal.confirm({
+      title: 'Delete Conversation',
+      content: 'Are you sure you want to delete this conversation?',
+      okText: 'Delete',
+      okType: 'danger',
+      cancelText: 'Cancel',
+      onOk: () => {
+        try {
+          const chatCopy = [...chat];
+          chatCopy.splice(originalIndex, 1);
+          
+          // If we're deleting the current chat, switch to another one
+          if (currentChat === originalIndex) {
+            const newCurrentChat = originalIndex > 0 ? originalIndex - 1 : 0;
+            setState({ 
+              chat: chatCopy,
+              currentChat: chatCopy.length > 0 ? newCurrentChat : 0
+            });
+          } else {
+            // If we're deleting a chat with an index less than the current one,
+            // we need to adjust the currentChat index
+            const newCurrentChat = originalIndex < currentChat ? currentChat - 1 : currentChat;
+            setState({ 
+              chat: chatCopy,
+              currentChat: chatCopy.length > 0 ? newCurrentChat : 0
+            });
+          }
+          
+          // Close the drawer if there are no more conversations
+          if (chatCopy.length === 0) {
+            setState({ is: { ...is, drawerVisible: false } });
+          }
+          
+          antMessage.success('Conversation deleted successfully');
+        } catch (error) {
+          console.error('Error deleting conversation:', error);
+          antMessage.error('Failed to delete conversation');
+        }
+      }
+    });
+  };
+
+  return (
+    <div
+      key={originalIndex}
+      className={classnames(
+        styles.drawer_conversation_item,
+        currentChat === originalIndex && styles.drawer_conversation_active
+      )}
+      onClick={() => {
+        setState({ currentChat: originalIndex });
+      }}
+    >
+      <div className={styles.drawer_conversation_title}>
+        {getMessagePreview(item.messages)}
+      </div>
+      <div className={styles.drawer_conversation_messages}>
+        {item.messages?.length || 0} messages
+      </div>
+      <div className={styles.drawer_conversation_date}>
+        {new Date(
+          item.messages[item.messages.length - 1]?.sentTime || item.ct
+        ).toLocaleString("en-US", {
+          year: "numeric",
+          month: "short",
+          day: "numeric",
+          hour: "2-digit",
+          minute: "2-digit",
+          hour12: true,
+        })}
+      </div>
+      <div className={styles.drawer_conversation_delete} onClick={handleDelete}>
+        <AntdTooltip title="Delete conversation" placement="left">
+          <DeleteOutlined style={{ fontSize: '16px' }} />
+        </AntdTooltip>
+      </div>
+    </div>
+  );
+}
 
 export function MessageHeader() {
   const { is, setIs, clearMessage, options, chat, currentChat, setState } =
@@ -265,47 +352,20 @@ export function MessageHeader() {
                 currentPersona && 
                 itemPersona && 
                 currentPersona === itemPersona &&
-                (item.messages?.length > 0) // Filter out conversations with 0 messages
+                (item.messages?.length > 0)
               );
             })
-            .map((item, index) => {
-              // Find the actual index in the original chat array
-              const originalIndex = chat.findIndex((c) => c === item);
-              return (
-                <div
-                  key={originalIndex}
-                  className={classnames(
-                    styles.drawer_conversation_item,
-                    currentChat === originalIndex &&
-                      styles.drawer_conversation_active
-                  )}
-                  onClick={() => {
-                    setState({ currentChat: originalIndex });
-                    setState({ is: { ...is, drawerVisible: false } });
-                  }}
-                >
-                  <div className={styles.drawer_conversation_title}>
-                    {getMessagePreview(item.messages)}
-                  </div>
-                  <div className={styles.drawer_conversation_messages}>
-                    {item.messages?.length || 0} messages
-                  </div>
-                  <div className={styles.drawer_conversation_date}>
-                    {new Date(
-                      item.messages[item.messages.length - 1]?.sentTime ||
-                        item.ct
-                    ).toLocaleString("en-US", {
-                      year: "numeric",
-                      month: "short",
-                      day: "numeric",
-                      hour: "2-digit",
-                      minute: "2-digit",
-                      hour12: true,
-                    })}
-                  </div>
-                </div>
-              );
-            })}
+            .map((item, index) => (
+              <ConversationItem
+                key={index}
+                item={item}
+                index={index}
+                chat={chat}
+                currentChat={currentChat}
+                is={is}
+                setState={setState}
+              />
+            ))}
           {!chat.some((item) => {
             const currentPersona = chat[currentChat]?.persona?.title;
             const itemPersona = item.persona?.title;
@@ -760,44 +820,17 @@ export function ChatMessage() {
                   item.messages?.length > 0 // Filter out conversations with 0 messages
                 );
               })
-              .map((item, index) => {
-                // Find the actual index in the original chat array
-                const originalIndex = chat.findIndex((c) => c === item);
-                return (
-                  <div
-                    key={originalIndex}
-                    className={classnames(
-                      styles.drawer_conversation_item,
-                      currentChat === originalIndex &&
-                        styles.drawer_conversation_active
-                    )}
-                    onClick={() => {
-                      setState({ currentChat: originalIndex });
-                      setState({ is: { ...is, drawerVisible: false } });
-                    }}
-                  >
-                    <div className={styles.drawer_conversation_title}>
-                      {getMessagePreview(item.messages)}
-                    </div>
-                    <div className={styles.drawer_conversation_messages}>
-                      {item.messages?.length || 0} messages
-                    </div>
-                    <div className={styles.drawer_conversation_date}>
-                      {new Date(
-                        item.messages[item.messages.length - 1]?.sentTime ||
-                          item.ct
-                      ).toLocaleString("en-US", {
-                        year: "numeric",
-                        month: "short",
-                        day: "numeric",
-                        hour: "2-digit",
-                        minute: "2-digit",
-                        hour12: true,
-                      })}
-                    </div>
-                  </div>
-                );
-              })}
+              .map((item, index) => (
+                <ConversationItem
+                  key={index}
+                  item={item}
+                  index={index}
+                  chat={chat}
+                  currentChat={currentChat}
+                  is={is}
+                  setState={setState}
+                />
+              ))}
             {!chat.some((item) => {
               const currentPersona = chat[currentChat]?.persona?.title;
               const itemPersona = item.persona?.title;

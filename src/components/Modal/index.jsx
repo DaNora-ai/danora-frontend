@@ -6,9 +6,12 @@ import { Button } from "../Button";
 import styles from './modal.module.less'
 
 export const Modal = (props) => {
-  const { visible, onClose, children, title, footer, className, draggable = true } = props
+  const { visible, onClose, children, title, footer, className, draggable = true, width, height } = props
   const [position, setPosition] = useState({ x: 0, y: 0 });
-  const [size, setSize] = useState({ width: 500, height: 300 });
+  const [size, setSize] = useState({ 
+    width: width || 500, 
+    height: height || 300 
+  });
 
   const [hidden, setHidden] = useState(false);
   useEffect(() => {
@@ -40,8 +43,18 @@ export const Modal = (props) => {
     onClose && onClose()
   }
 
+  // Update size when props change
+  useEffect(() => {
+    if (width || height) {
+      setSize({
+        width: width || size.width,
+        height: height || size.height
+      });
+    }
+  }, [width, height]);
+
   const modalContent = (
-    <div className={classnames(styles.modal, className)}>
+    <div className={classnames(styles.modal, className)} style={props.style}>
       <div className={styles.header}>
         <div className={styles.title}>{title}</div>
         <Button type="icon" icon="close" onClick={handleClose} />
@@ -49,8 +62,8 @@ export const Modal = (props) => {
       <div
         className={styles.container}
         style={{
-          width: size.width,
-          height: size.height,
+          width: props.style?.width || size.width,
+          height: props.style?.height || size.height,
           top: position.y,
           left: position.x
         }}
