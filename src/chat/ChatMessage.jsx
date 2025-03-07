@@ -33,7 +33,7 @@ import { Button as AntButton, FloatButton, message as antMessage } from "antd"; 
 const getMessagePreview = (messages) => {
   if (messages && messages.length > 0 && messages[0].content) {
     const content = messages[0].content;
-    return content.substring(0, 10) + (content.length > 10 ? '...' : '');
+    return content.substring(0, 20) + (content.length > 20 ? '...' : '');
   }
   return "New Chat";
 };
@@ -286,7 +286,23 @@ export function MessageHeader() {
               />
             </AntdTooltip> */}
 
-            <AntButton danger onClick={handleLogout}>
+            <AntButton 
+              danger 
+              style={{
+                transition: 'all 0.3s'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = '#ff4d4f';
+                e.currentTarget.style.borderColor = '#ff4d4f';
+                e.currentTarget.style.color = 'white';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = '';
+                e.currentTarget.style.borderColor = '';
+                e.currentTarget.style.color = '';
+              }}
+              onClick={handleLogout}
+            >
               Logout
             </AntButton>
           </div>
@@ -511,6 +527,7 @@ export function MessageBar({ handleSendMessage }) {
               }
             }}
             className={styles.notoSansTextarea}
+            style={{ fontSize: "16px" }}
           />
         </div>
         <div className={styles.bar_actions}>

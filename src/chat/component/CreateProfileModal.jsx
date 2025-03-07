@@ -16,6 +16,7 @@ import { UploadOutlined } from "@ant-design/icons";
 import { auth } from "../context/firebase";
 import styles from "./CreateProfileModal.module.less";
 import { useGlobal } from "../context";
+import { TypeAnimation } from 'react-type-animation';
 
 const { TextArea } = Input;
 
@@ -399,14 +400,33 @@ export function CreateProfileModal({ visible, onClose, isPersonaOnly = false }) 
 
   const renderPersonaDetailsStep = () => (
     <>
-      <div style={{ 
-        marginBottom: "24px", 
-        fontSize: "16px", 
-        color: "#666",
-        textAlign: "center",
-        lineHeight: "1.5"
-      }}>
-        Create your perfect, ultra-detailed target persona in just a few clicks—built from 1M+ real social media posts!
+      <div
+        style={{
+          marginBottom: "24px",
+          fontSize: "15px",
+          fontWeight: "500",
+          color: "#1890ff",
+          textAlign: "center",
+          lineHeight: "1.5",
+        }}
+      >
+        <TypeAnimation
+          preRenderFirstString={true}
+          sequence={[
+            500,
+            "Create your ultra-detailed persona in just a few clicks", // initially rendered starting point
+            1000,
+            "Create your Gen Z personas from 1M+ real social media posts",
+            1000,
+          ]}
+          speed={50}
+          style={{
+            fontSize: "15px",
+            fontWeight: "500",
+            display: "inline-block",
+          }}
+          repeat={Infinity}
+        />
       </div>
       {/* Persona Details */}
       <Divider orientation="left">Persona Details</Divider>
@@ -663,7 +683,8 @@ export function CreateProfileModal({ visible, onClose, isPersonaOnly = false }) 
       title={
         <span style={{ 
           fontSize: "20px", 
-          fontWeight: "600" 
+          fontWeight: "600", 
+          color: "#1890ff"
         }}>
           {hasProfile ? "Edit Profile" : (currentStep === 0 ? "Create Profile" : "Create Target Persona")}
         </span>

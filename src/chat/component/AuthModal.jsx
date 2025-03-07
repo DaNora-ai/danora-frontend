@@ -2,6 +2,7 @@
 import React, { useState } from "react";
 import { Modal, Button, Input, Icon } from "@/components";
 import { auth, googleProvider } from "../context/firebase";
+import { TypeAnimation } from 'react-type-animation';
 import {
   signInWithPopup,
   createUserWithEmailAndPassword,
@@ -265,7 +266,34 @@ export function AuthModal({ visible, onClose, onSignUpSuccess }) {
     <Modal
       visible={visible}
       onClose={onClose}
-      title={isLogin ? "Login" : "Sign Up"}
+      title={
+        <span
+          style={{
+            color: "#4a6cf7",
+            fontWeight: "bold",
+            textAlign: "center",
+            width: "100%",
+            display: "block",
+          }}
+        >
+          <TypeAnimation
+            sequence={[
+              'Powered by millions of conversations across 300 platforms',
+              1000,
+              'Real-time insights from Reddit, Instagram, Amazon Reviews, etc',
+              1000,
+              'Understand and train Gen Z insights through 71+ languages',
+              1000,
+              'Data-driven accurate decisions by personas during the conversation',
+              1000,
+            ]}
+            wrapper="span"
+            speed={50}
+            style={{ display: 'inline-block', fontSize: "20px", marginLeft: "320px" }}
+            repeat={Infinity}
+          />
+        </span>
+      }
       width={1200}
       draggable={false}
       style={{ height: "auto", maxHeight: "90vh", maxWidth: "95vw" }}
