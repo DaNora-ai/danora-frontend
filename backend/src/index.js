@@ -10,6 +10,25 @@ const port = process.env.PORT || 3001;
 app.use(cors());
 app.use(express.json());
 
+// Request logging middleware
+app.use((req, res, next) => {
+    console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
+    
+    // Log request body if present
+    if (req.body && Object.keys(req.body).length > 0) {
+        console.log('Request body:', JSON.stringify(req.body, null, 2));
+    }
+    
+    // Capture the original res.json to intercept responses
+    const originalJson = res.json;
+    res.json = function(data) {
+        console.log(`[${new Date().toISOString()}] Response for ${req.method} ${req.url}:`, JSON.stringify(data, null, 2));
+        return originalJson.call(this, data);
+    };
+    
+    next();
+});
+
 // Health check route
 app.get('/', (req, res) => {
     res.json({ status: 'ok', message: 'Server is running' });
@@ -159,25 +178,143 @@ app.get('/api/personas/:uid/:email', async (req, res) => {
             email: req.params.email
         }).toArray();
 
-        console.log('Found profiles:', profiles);
+        console.log('Found profiles from DB:', profiles.length);
+        if (profiles.length > 0) {
+            console.log('Sample profile:', {
+                _id: profiles[0]._id,
+                persona_name: profiles[0].persona_name,
+                profileId: profiles[0].profileId
+            });
+        }
 
-        const personas = profiles.map(profile => ({
-            persona_type: profile.persona_type,
-            persona_name: profile.persona_name,
-            persona_bio: profile.persona_bio,
-            role: "system",
-            id: profile.persona_type === "General" ? 1 :
-                profile.persona_type === "Fashion" ? 2 :
-                profile.persona_type === "Luxury" ? 3 :
-                profile.persona_type === "Food" ? 4 :
-                profile.persona_type === "Technology" ? 5 : 1
-        }));
+        // Transform profiles into personas with consistent field names
+        const personas = profiles.map(profile => {
+            // Ensure persona_name exists
+            if (!profile.persona_name) {
+                console.warn('Profile missing persona_name:', profile);
+                // Skip profiles without a name
+                return null;
+            }
+            
+            // Primary identifier for frontend use is MongoDB _id
+            const mongoId = profile._id.toString();
+            
+            return {
+                persona_type: profile.persona_type || 'Unknown',
+                persona_name: profile.persona_name,
+                persona_bio: profile.persona_bio || '',
+                // Use MongoDB _id for reliable identification/deletion
+                profileId: mongoId,
+                // Include the database profileId as a separate field
+                databaseProfileId: profile.profileId,
+                // For UI categorization
+                role: "system",
+                id: profile.persona_type?.toLowerCase() === "general" ? 1 :
+                    profile.persona_type?.toLowerCase() === "fashion" ? 2 :
+                    profile.persona_type?.toLowerCase() === "luxury" ? 3 :
+                    profile.persona_type?.toLowerCase() === "food" ? 4 :
+                    profile.persona_type?.toLowerCase() === "technology" ? 5 : 1
+            };
+        }).filter(persona => persona !== null); // Remove any null entries
 
-        console.log('Transformed personas:', personas);
+        console.log('Transformed personas to return:', personas.length);
+        if (personas.length > 0) {
+            console.log('Sample transformed persona:', {
+                persona_name: personas[0].persona_name,
+                profileId: personas[0].profileId
+            });
+        }
+        
         res.json({ success: true, personas });
     } catch (error) {
         console.error("Error fetching personas from MongoDB:", error);
         res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// Delete persona by ObjectId or name
+app.delete('/api/personas/:identifier', async (req, res) => {
+    try {
+        const { getDB } = require('./config/db');
+        const db = await getDB();
+        const collection = db.collection("Profiles");
+        const { ObjectId } = require('mongodb');
+        
+        const identifier = req.params.identifier;
+        console.log('Received delete request with identifier:', identifier);
+
+        let query = {};
+        let foundDocument = null;
+
+        // Check if the identifier is a valid ObjectId (24 characters hex string)
+        if (identifier.match(/^[0-9a-fA-F]{24}$/)) {
+            try {
+                // First try directly with the ObjectId
+                query = { _id: new ObjectId(identifier) };
+                console.log('Attempting to find by MongoDB ObjectId:', identifier);
+                foundDocument = await collection.findOne(query);
+                console.log('Found by ObjectId:', !!foundDocument);
+            } catch (err) {
+                console.error('Error converting to ObjectId:', err);
+                // If error in ObjectId conversion, continue to next approach
+            }
+        }
+        
+        // If not found by ObjectId, try by persona_name
+        if (!foundDocument) {
+            query = { persona_name: decodeURIComponent(identifier) };
+            console.log('Attempting to find by persona_name:', decodeURIComponent(identifier));
+            foundDocument = await collection.findOne(query);
+            console.log('Found by persona_name:', !!foundDocument);
+        }
+        
+        // If still not found, try by profileId field
+        if (!foundDocument && identifier.match(/^\d+$/)) {
+            query = { profileId: identifier };
+            console.log('Attempting to find by profileId field:', identifier);
+            foundDocument = await collection.findOne(query);
+            console.log('Found by profileId field:', !!foundDocument);
+        }
+
+        // If we found the document, delete it by its _id for precision
+        if (foundDocument) {
+            console.log('Found document to delete:', {
+                _id: foundDocument._id,
+                persona_name: foundDocument.persona_name,
+                profileId: foundDocument.profileId
+            });
+            
+            // Use _id for precise deletion
+            const deleteResult = await collection.deleteOne({ _id: foundDocument._id });
+            console.log('Delete result:', deleteResult);
+            
+            if (deleteResult.deletedCount === 1) {
+                console.log('Successfully deleted persona');
+                res.json({ 
+                    success: true, 
+                    message: 'Persona deleted successfully',
+                    deletedId: foundDocument._id.toString()
+                });
+            } else {
+                console.log('Delete operation failed though document was found');
+                res.status(500).json({ 
+                    success: false, 
+                    error: 'Delete operation failed' 
+                });
+            }
+        } else {
+            console.log('No document found to delete');
+            res.status(404).json({ 
+                success: false, 
+                error: 'Persona not found' 
+            });
+        }
+    } catch (error) {
+        console.error("Error deleting persona from MongoDB:", error);
+        res.status(500).json({ 
+            success: false, 
+            error: error.message 
+        });
     }
 });
 

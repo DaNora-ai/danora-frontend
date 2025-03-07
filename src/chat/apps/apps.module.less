@@ -85,9 +85,15 @@
   align-items: center;
   border-radius: var(--border-radius);
   transition: all 0.2s ease;
+  position: relative;
   
   &:hover {
     background-color: var(--background-color-gray);
+    
+    .delete_button {
+      opacity: 1;
+      visibility: visible;
+    }
   }
   &_content {
     flex: 1;
@@ -132,5 +138,28 @@
     color: var(--primary);
     margin-left: var(--spacing);
     font-size: 16px;
+  }
+}
+
+.delete_button {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #ff4d4f;
+  color: white;
+  border-radius: 50%;
+  cursor: pointer;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.2s ease;
+  
+  &:hover {
+    transform: scale(1.1);
+    background-color: #ff7875;
   }
 }
