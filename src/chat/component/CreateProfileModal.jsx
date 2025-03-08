@@ -12,7 +12,7 @@ import {
   notification,
   Spin,
 } from "antd";
-import { UploadOutlined } from "@ant-design/icons";
+import { UploadOutlined, CloseOutlined } from "@ant-design/icons";
 import { auth } from "../context/firebase";
 import styles from "./CreateProfileModal.module.less";
 import { useGlobal } from "../context";
@@ -681,13 +681,35 @@ export function CreateProfileModal({ visible, onClose, isPersonaOnly = false }) 
         onClose();
       }}
       title={
-        <span style={{ 
+        <div style={{ 
           fontSize: "20px", 
           fontWeight: "600", 
-          color: "#1890ff"
+          color: "#1890ff",
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          width: "100%"
         }}>
-          {hasProfile ? "Edit Profile" : (currentStep === 0 ? "Create Profile" : "Create Target Persona")}
-        </span>
+          <span>
+            {hasProfile ? "Edit Profile" : (currentStep === 0 ? "Create Profile" : "Create Target Persona")}
+          </span>
+          {(currentStep === 1 || isPersonaOnly) && (
+            <CloseOutlined 
+              onClick={(e) => {
+                e.stopPropagation();
+                setError("");
+                setSuccess("");
+                onClose();
+              }} 
+              style={{ 
+                cursor: "pointer",
+                fontSize: "16px",
+                color: "#999",
+                marginLeft: "250px"
+              }}
+            />
+          )}
+        </div>
       }
       draggable={false}
     >

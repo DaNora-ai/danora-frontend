@@ -14,7 +14,10 @@ module.exports = {
     filename: "[name].js",
   },
   devServer: {
-    open: true,
+    allowedHosts: ["localhost", "127.0.0.1", ".danora.ai"],
+    host: "0.0.0.0", // Listen on all interfaces
+    port: 8080,
+    // open: true,
   },
   devtool: "inline-source-map",
   resolve: {

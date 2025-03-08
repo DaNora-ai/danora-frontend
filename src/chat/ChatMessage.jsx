@@ -611,7 +611,7 @@ export function ChatMessage() {
       // Create a temporary assistant message
       const assistantMessage = {
         role: "assistant",
-        content: "Thinking...",
+        content: " ",
         sentTime: new Date().toISOString(),
         id: Date.now() + 1,
         uid: currentUser?.uid || "anonymous",
