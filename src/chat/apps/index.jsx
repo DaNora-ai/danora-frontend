@@ -118,7 +118,7 @@ export function AppContainer() {
   };
 
   return (
-    <div className={styles.apps}>
+    <div className={`${styles.apps} personas-sidebar`}>
       {category.map((item, index) => <Category index={index} {...item} key={item.id} />)}
       <div className={styles.create_persona}>
         <Button

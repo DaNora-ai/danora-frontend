@@ -27,6 +27,7 @@ import { auth } from "./context/firebase.js";
 import { sendChatMessage } from "./service/chat";
 import { notification, Tooltip as AntdTooltip, Drawer, Modal } from "antd";
 import { Button as AntButton, FloatButton, message as antMessage } from "antd"; // <-- Added FloatButton import
+import Joyride from 'react-joyride';
 // import { insertToMongoDB } from './service/mongodb';
 
 // Helper function to get message preview
@@ -139,6 +140,20 @@ export function MessageHeader() {
   const [createProfileModalVisible, setCreateProfileModalVisible] =
     useState(false);
   const [hasProfile, setHasProfile] = useState(false);
+  const [runTour, setRunTour] = useState(false);
+  const [tourSteps, setTourSteps] = useState([
+    {
+      target: '.personas-sidebar',  // We'll add this class to the sidebar
+      content: 'Here you can find your personas. Click on a persona to start chatting with it.',
+      disableBeacon: true,
+      placement: 'right',
+    },
+    {
+      target: '.chat-history',  // We'll add this class to the chat history
+      content: 'Here you can see your chat history with the selected persona.',
+      placement: 'left',
+    }
+  ]);
 
   // Show auth modal on page load if user is not logged in
   useEffect(() => {
@@ -177,6 +192,16 @@ export function MessageHeader() {
   const handleProfileModalClose = () => {
     setCreateProfileModalVisible(false);
     checkUserProfile();
+    
+    // Check local storage to see if this is the first time closing the modal
+    const hasShownTour = localStorage.getItem('danora_has_shown_tour');
+    if (!hasShownTour) {
+      // Set a delay to ensure the UI has rendered properly
+      setTimeout(() => {
+        setRunTour(true);
+        localStorage.setItem('danora_has_shown_tour', 'true');
+      }, 500);
+    }
   };
 
   const handleLogout = async () => {
@@ -396,6 +421,24 @@ export function MessageHeader() {
           )}
         </div>
       </Drawer>
+      <Joyride
+        steps={tourSteps}
+        run={runTour}
+        continuous={true}
+        showSkipButton={true}
+        styles={{
+          options: {
+            zIndex: 10000,
+            primaryColor: '#1890ff',
+          }
+        }}
+        callback={(data) => {
+          const { status } = data;
+          if (status === 'finished' || status === 'skipped') {
+            setRunTour(false);
+          }
+        }}
+      />
     </div>
   );
 }
@@ -740,7 +783,7 @@ export function ChatMessage() {
 
         {/* FloatButton that shows only when drawer is closed */}
         {!is.drawerVisible && (
-          <AntdTooltip title="Chat History" placement="left">
+          <AntdTooltip title="Chat History" placement="left" className="chat-history">
             <FloatButton
               icon={
                 <div

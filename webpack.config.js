@@ -16,7 +16,7 @@ module.exports = {
   devServer: {
     allowedHosts: ["localhost", "127.0.0.1", ".danora.ai"],
     host: "0.0.0.0", // Listen on all interfaces
-    port: 8080,
+    port: 8081,
     // open: true,
   },
   devtool: "inline-source-map",
