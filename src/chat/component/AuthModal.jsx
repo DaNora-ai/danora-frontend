@@ -280,7 +280,7 @@ export function AuthModal({ visible, onClose, onSignUpSuccess }) {
             sequence={[
               'Powered by millions of conversations across 300 platforms',
               1000,
-              'Real-time insights from Reddit, Instagram, Amazon Reviews, etc',
+              'Real-time insights from TikTok, YouTube, Amazon Reviews, etc',
               1000,
               'Understand and train Gen Z insights through 71+ languages',
               1000,
