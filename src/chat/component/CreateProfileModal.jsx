@@ -286,8 +286,8 @@ export function CreateProfileModal({ visible, onClose, isPersonaOnly = false }) 
         // Add a small delay after the modal is closed before reloading
         setTimeout(() => {
           window.location.reload();
-        }, 200);
-      }, 1500);
+        }, 100);
+      }, 1000);
     } catch (err) {
       // Show error notification
       notification.error({
