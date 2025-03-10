@@ -162,6 +162,26 @@ export function MessageHeader() {
     }
   }, []);
 
+  // Check if we need to run the tour after a reload (after persona creation)
+  useEffect(() => {
+    const shouldRunTourAfterReload = localStorage.getItem('danora_run_tour_after_reload');
+    const hasShownTour = localStorage.getItem('danora_has_shown_tour');
+    
+    if (shouldRunTourAfterReload === 'true' && !hasShownTour) {
+      // Set a delay to ensure the UI has rendered properly
+      setTimeout(() => {
+        setRunTour(true);
+        // Clear the reload flag
+        localStorage.removeItem('danora_run_tour_after_reload');
+        // Mark that we've shown the tour to this user
+        localStorage.setItem('danora_has_shown_tour', 'true');
+      }, 1000);
+    } else if (shouldRunTourAfterReload === 'true') {
+      // Just clear the flag if tour has been shown before
+      localStorage.removeItem('danora_run_tour_after_reload');
+    }
+  }, []);
+
   const checkUserProfile = async () => {
     if (currentUser) {
       try {
@@ -193,8 +213,9 @@ export function MessageHeader() {
     setCreateProfileModalVisible(false);
     checkUserProfile();
     
-    // Check local storage to see if this is the first time closing the modal
+    // Check if this is a new signup (tour shouldn't have been shown yet)
     const hasShownTour = localStorage.getItem('danora_has_shown_tour');
+    // Only run the tour for new users who haven't seen it before
     if (!hasShownTour) {
       // Set a delay to ensure the UI has rendered properly
       setTimeout(() => {

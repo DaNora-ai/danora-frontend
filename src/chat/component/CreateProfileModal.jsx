@@ -276,6 +276,13 @@ export function CreateProfileModal({ visible, onClose, isPersonaOnly = false }) 
         setUserDetails(null);
         onClose();
         
+        // Only set the flag to run the tour if it hasn't been shown before
+        const hasShownTour = localStorage.getItem('danora_has_shown_tour');
+        if (!hasShownTour) {
+          // Set a flag to indicate that we should run the tour after reload
+          localStorage.setItem('danora_run_tour_after_reload', 'true');
+        }
+        
         // Add a small delay after the modal is closed before reloading
         setTimeout(() => {
           window.location.reload();
