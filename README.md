@@ -1,13 +1,13 @@
 # Danora Frontend
-- Design source:[https://www.figma.com/community/file/1236510244313601424](https://www.figma.com/community/file/1236510244313601424)
+
 
 ## Developing
 
 Simply clone the repository, install the dependencies, and run the development server:
 
 ```
-  git clone https://github.com/ninasaul/chat-gpt-ui.git
-  cd chat-gpt-ui
+  git clone https://github.com/DaNora-ai/danora-frontend.git
+  cd danora-frontend
   npm install
   npm run dev
 ```
